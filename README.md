@@ -15,9 +15,11 @@
 
 ## Team information
 - Team name: 
-- Team members:
+- Team members: Mahibah, Harishan, Harsh, Syed, Kajaanan, Jiya, Duaa, Zafina
 
 ## Project management setup
 - With your assigned group, set-up a Team Project website on Trello(trello.com) to manage your project.
 - Add a link to your Trello board here.
 - Share your board with the 3750 email (cis3750@socs.uoguelph.ca).
+
+Trello: https://trello.com/b/KrqY3Dfe/ios-update
