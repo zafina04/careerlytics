@@ -16,6 +16,8 @@
 ## Team information
 - Team name: 
 - Team members: Mahibah, Harishan, Harsh, Syed, Kajaanan, Jiya, Duaa, Zafina
+- GitHub Usernames:
+  - 
 
 ## Project management setup
 - With your assigned group, set-up a Team Project website on Trello(trello.com) to manage your project.
