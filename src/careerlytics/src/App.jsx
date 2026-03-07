@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route, NavLink } from 'react-router-dom'
+import Home from './pages/Home'
 
-function App() {
-  const [count, setCount] = useState(0)
+// ── Placeholder pages (we'll build these next) ──────────────────────────────
+const Placeholder = ({ title }) => (
+  <div style={{
+    display: 'flex', flexDirection: 'column', alignItems: 'center',
+    justifyContent: 'center', height: 'calc(100vh - 60px)',
+    fontFamily: 'Syne, sans-serif', color: '#64748b', gap: '0.5rem'
+  }}>
+    <span style={{ fontSize: '2.5rem' }}>🚧</span>
+    <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>{title}</h2>
+    <p style={{ fontSize: '0.9rem' }}>Coming soon — check back next sprint!</p>
+  </div>
+)
 
+// ── Navbar ───────────────────────────────────────────────────────────────────
+function Navbar() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <nav className="navbar">
+      <NavLink to="/" className="logo">
+        <span className="logo-pulse" />
+        Careerlytics
+      </NavLink>
+      <ul className="nav-links">
+        <li><NavLink to="/"             end>Home</NavLink></li>
+        <li><NavLink to="/dashboard"       >Job Dashboard</NavLink></li>
+        <li><NavLink to="/insight"         >Career Insight</NavLink></li>
+        <li><NavLink to="/compare"         >Compare Career</NavLink></li>
+        <li><NavLink to="/about"           >About Us</NavLink></li>
+      </ul>
+    </nav>
   )
 }
 
-export default App
+// ── App ──────────────────────────────────────────────────────────────────────
+export default function App() {
+  return (
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/"          element={<Home />} />
+        <Route path="/dashboard" element={<Placeholder title="Job Dashboard" />} />
+        <Route path="/insight"   element={<Placeholder title="Career Insight" />} />
+        <Route path="/compare"   element={<Placeholder title="Compare Career" />} />
+        <Route path="/about"     element={<Placeholder title="About Us" />} />
+      </Routes>
+    </>
+  )
+}
