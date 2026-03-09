@@ -33,13 +33,7 @@ export default function FindOccupation() {
             {/*Calling the general side panel here*/}
             <SidePanel>
 
-                {/*Calling the occupation list */}
-                <OccupationList>
-
-
-
-                </OccupationList>
-
+                
 
             <p style={{ color: 'white' }}>Side panel content here</p>
 
