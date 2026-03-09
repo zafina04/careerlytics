@@ -21,7 +21,7 @@ function useFadeUp(delay = 0) {
 
 // ── Nav pages ─────────────────────────────────────────────────────────────────
 const NAV_PAGES = [
-  { route: '/dashboard', icon: '📋', label: 'Job Dashboard',  desc: 'Live postings across Canada',         color: '#2563eb', light: '#eff6ff' },
+  { route: '/dashboard', icon: '📋', label: 'Find Occupations',  desc: 'Live postings across Canada',         color: '#2563eb', light: '#eff6ff' },
   { route: '/insight',   icon: '📈', label: 'Career Insight', desc: 'Trends & growth over time',           color: '#0284c7', light: '#e0f2fe' },
   { route: '/compare',   icon: '⚖️',  label: 'Compare Career', desc: 'Side-by-side career analysis',       color: '#059669', light: '#ecfdf5' },
   { route: '/about',     icon: '🙋', label: 'About Us',       desc: 'Our data, team & mission',            color: '#7c3aed', light: '#f5f3ff' },
