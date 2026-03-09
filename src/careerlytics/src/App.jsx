@@ -1,6 +1,9 @@
 import { Routes, Route, NavLink } from 'react-router-dom'
 import Home from './pages/Home'
 
+import FindOccupation from './pages/FindOccupation'
+
+
 // ── Placeholder pages (we'll build these next) ──────────────────────────────
 const Placeholder = ({ title }) => (
   <div style={{
@@ -40,7 +43,7 @@ export default function App() {
       <Navbar />
       <Routes>
         <Route path="/"          element={<Home />} />
-        <Route path="/dashboard" element={<Placeholder title="Job Dashboard" />} />
+        <Route path="/dashboard" element={<FindOccupation />} />
         <Route path="/insight"   element={<Placeholder title="Career Insight" />} />
         <Route path="/compare"   element={<Placeholder title="Compare Career" />} />
         <Route path="/about"     element={<Placeholder title="About Us" />} />
