@@ -72,30 +72,45 @@ const AboutUs = () => {
         <div style={{ position: "relative", background: "#0d0e1a", border: "1px solid #1e2035", borderRadius: 14, padding: "1.75rem" }}>
 
           {/* Thank-you banner */}
-          {submitted && (
+            {submitted && (
             <div style={{
-              position: "absolute", top: 16, right: 16,
-              background: "rgba(13,14,26,0.97)", border: "1px solid #c9a84c",
-              borderRadius: 10, padding: "14px 20px",
-              display: "flex", alignItems: "center", gap: 20,
-              boxShadow: "0 4px 32px rgba(201,168,76,.15)", zIndex: 10, minWidth: 260
+                position: "absolute",
+                top: "50%", left: "50%",
+                transform: "translate(-50%, -50%)",
+                background: "rgba(13,14,26,0.97)", border: "1px solid #2e3050",
+                borderRadius: 12, padding: "20px 28px",
+                display: "flex", alignItems: "center", gap: 24,
+                boxShadow: "0 8px 40px rgba(0,0,0,0.5)", zIndex: 10, minWidth: 280
             }}>
-              <span style={{ fontFamily: "'Playfair Display',serif", color: "#e8c97a", fontSize: "1rem", fontWeight: 600 }}>
-                Thank you!
-              </span>
-              <button
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <span style={{
+                    fontFamily: "'DM Sans',sans-serif", color: "#c4c8e0",
+                    fontSize: "1rem", fontWeight: 600, letterSpacing: ".01em"
+                }}>
+                    Thank you for your feedback!
+                </span>
+                <span style={{ fontSize: "0.78rem", color: "#4a4f6a", fontFamily: "'DM Sans',sans-serif" }}>
+                    We appreciate you taking the time.
+                </span>
+                </div>
+                <button
                 onClick={() => { setSubmitted(false); setFeedback(""); }}
-                style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#4a4f6a", fontSize: "1rem", lineHeight: 1, padding: "2px 4px", borderRadius: 4 }}
-                onMouseEnter={e => e.currentTarget.style.color = "#e8c97a"}
-                onMouseLeave={e => e.currentTarget.style.color = "#4a4f6a"}
-              >✕</button>
+                style={{
+                    marginLeft: "auto", background: "none", border: "none",
+                    cursor: "pointer", color: "#e05555", fontSize: "1.1rem",
+                    lineHeight: 1, padding: "4px 6px", borderRadius: 4,
+                    flexShrink: 0, transition: "color .2s"
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = "#ff7070"}
+                onMouseLeave={e => e.currentTarget.style.color = "#e05555"}
+                >✕</button>
             </div>
-          )}
+            )}
 
           <textarea
             value={feedback}
             onChange={e => setFeedback(e.target.value)}
-            placeholder="type here...."
+            placeholder="Type here...."
             rows={6}
             style={{
               width: "100%", padding: "14px", background: "#080810",
@@ -156,16 +171,16 @@ const AboutUs = () => {
           <div style={{ fontSize: "0.82rem", color: "#4a4f6a", fontFamily: "'DM Sans',sans-serif", lineHeight: 2 }}>
             contact@careerlytics.ca<br />
             research@careerlytics.ca<br />
-            +1 (416) 555-0192
+            +1 (123) 456-7890
           </div>
         </div>
         <div>
           <div style={{ fontSize: "0.7rem", color: "#4a4f6a", letterSpacing: ".1em", fontFamily: "'DM Mono',monospace", marginBottom: 10 }}>ADDRESS</div>
           <div style={{ fontSize: "0.82rem", color: "#4a4f6a", fontFamily: "'DM Sans',sans-serif", lineHeight: 2 }}>
-            Archive Intelligence Lab<br />
-            University Research Centre<br />
-            123 Census Drive, Suite 400<br />
-            Toronto, ON M5V 2T6
+            CIS3750 Group 12<br />
+            University of Guelph<br />
+            50 Stone Road East, Ontario, Canada<br />
+            Guelph, N1G 2W1
           </div>
         </div>
       </div>
