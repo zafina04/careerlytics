@@ -3,6 +3,8 @@ import Home from './pages/Home'
 
 import FindOccupation from './pages/FindOccupation'
 
+import Histrocial from './pages/Historical'
+
 
 // ── Placeholder pages (we'll build these next) ──────────────────────────────
 const Placeholder = ({ title }) => (
@@ -28,6 +30,7 @@ function Navbar() {
       <ul className="nav-links">
         <li><NavLink to="/"             end>Home</NavLink></li>
         <li><NavLink to="/dashboard"       >Job Dashboard</NavLink></li>
+        <li><NavLink to="/insight"       >Historical Insight</NavLink></li>
         <li><NavLink to="/chatbot"         >Historical Chatbot</NavLink></li>
         <li><NavLink to="/compare"         >Compare Career</NavLink></li>
         <li><NavLink to="/about"           >About Us</NavLink></li>
@@ -44,7 +47,8 @@ export default function App() {
       <Routes>
         <Route path="/"          element={<Home />} />
         <Route path="/dashboard" element={<FindOccupation />} />
-        <Route path="/insight"   element={<Placeholder title="Historical Chatbot" />} />
+        <Route path="/insight"   element={<Histrocial/>} />
+        <Route path="/chatbot"   element={<Placeholder title="Historical Chatbot" />} />
         <Route path="/compare"   element={<Placeholder title="Compare Career" />} />
         <Route path="/about"     element={<Placeholder title="About Us" />} />
       </Routes>

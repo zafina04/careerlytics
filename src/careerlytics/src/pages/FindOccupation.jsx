@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 //All the data
-const OCCUPATIONS = [
+export const OCCUPATIONS = [
     'Management Occupations',
     'Business, Finance and Administration Occupations',
     'Natural and Applied Sciences and Related Occupations',
