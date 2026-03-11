@@ -300,9 +300,9 @@ export default function FindOccupation() {
               <div style={styles.cardLabel}>ML INSIGHT — TREND CLASSIFICATION</div>
               <div style={styles.mlText}>
                 {delta < -30
-                  ? `Our K-Means clustering model places ${applied.occ} in the Technological Displacement cluster — characterized by rapid decline following mechanization or infrastructure change.`
+                  ? `Our K-Means clustering model places ${applied.occ} in the Technological Displacement cluster, characterized by rapid decline following mechanization or infrastructure change.`
                   : delta > 20
-                  ? `Our trend detection model classifies ${applied.occ} as Sustained Growth — driven by urbanization, education policy, or industrial expansion.`
+                  ? `Our trend detection model classifies ${applied.occ} as Sustained Growth, driven by urbanization, education policy, or industrial expansion.`
                   : `${applied.occ} is classified as Cyclically Stable — fluctuating with economic cycles but maintaining structural presence in the labor market.`
                 }
               </div>
