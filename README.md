@@ -4,11 +4,11 @@
 
 --HOW TO RUN
 
-cd project-setup-g12-ios-update
-cd src
-cd careerlytics
-cd src
-npm run dev
+1. cd project-setup-g12-ios-update
+2. cd src
+3. cd careerlytics
+4. cd src
+5. npm run dev
 
 ---
 
@@ -20,7 +20,7 @@ npm run dev
 5. Put code in `src/`, tests in `tests/`, and update `requirements.txt` if needed.
 
 ---
-
+ 
 ## Team information
 - Team name: 
 - Team members: Mahibah, Harishan, Harsh, Syed, Kajaanan, Jiya, Duaa, Zafina
