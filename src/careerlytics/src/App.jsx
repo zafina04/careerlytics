@@ -26,7 +26,6 @@ function Navbar() {
     <nav className="navbar">
       <NavLink to="/" className="logo">
         <img src="/logo.png" alt="Careerlytics" style={{ height: 180, width: 'auto' }} />
-        Careerlytics
       </NavLink>
       <ul className="nav-links">
         <li><NavLink to="/"             end>Home</NavLink></li>

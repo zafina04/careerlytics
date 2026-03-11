@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-//All the data
+// all occupation data
 export const OCCUPATIONS = [
     'Management Occupations',
     'Business, Finance and Administration Occupations',
@@ -24,7 +24,7 @@ const PROVINCES = [
 ];
 
 
-//this function is the general side panel layout
+// this function is the general side panel layout
 function SidePanel({ children }) {
 
     return <div style = {styles.sidePanel}>{children}</div>
@@ -176,7 +176,7 @@ export default function FindOccupation() {
   const [province,  setProvince]  = useState("All");
   const [yearRange, setYearRange] = useState([1987, 2025]);
   const [partTime,  setPartTime]  = useState(false);
-  const [fullTime,  setFullTime]  = useState(true);
+  const [fullTime,  setFullTime]  = useState(false);
   const [applied,   setApplied]   = useState(null);
 
   const toggleOcc = o =>
@@ -191,11 +191,13 @@ export default function FindOccupation() {
     if (selected.length) setApplied({ occ: selected[0], province, yearRange });
   };
 
-  const reset = () => {
+  const reset = () => { // this resets the UI visually but have to make sure it resets the filters as well (reset button removes displayed data, so probably dont have to worry about it)
     setSelected([]);
     setApplied(null);
     setProvince("All");
     setYearRange([1987, 2025]);
+    setPartTime(false);
+    setFullTime(false);
   };
 
   const chartData = applied
@@ -298,9 +300,9 @@ export default function FindOccupation() {
               <div style={styles.cardLabel}>ML INSIGHT — TREND CLASSIFICATION</div>
               <div style={styles.mlText}>
                 {delta < -30
-                  ? `Our K-Means clustering model places ${applied.occ} in the Technological Displacement cluster — characterized by rapid decline following mechanization or infrastructure change.`
+                  ? `Our K-Means clustering model places ${applied.occ} in the Technological Displacement cluster, characterized by rapid decline following mechanization or infrastructure change.`
                   : delta > 20
-                  ? `Our trend detection model classifies ${applied.occ} as Sustained Growth — driven by urbanization, education policy, or industrial expansion.`
+                  ? `Our trend detection model classifies ${applied.occ} as Sustained Growth, driven by urbanization, education policy, or industrial expansion.`
                   : `${applied.occ} is classified as Cyclically Stable — fluctuating with economic cycles but maintaining structural presence in the labor market.`
                 }
               </div>
