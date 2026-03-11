@@ -3,13 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 //All the data
-const OCCUPATIONS = [
+export const OCCUPATIONS = [
     'Management Occupations',
-    'Business, Finance and Aminstration',
-    'Nurse',
-    'Teacher',
-    'Accountant',
-  ]
+    'Business, Finance and Administration Occupations',
+    'Natural and Applied Sciences and Related Occupations',
+    'Health Occupations, except management',
+    'Occupations in Education, Law and Social, Community and Government Services',
+    'Occupations in Art, Culture, Recreation and Sport',
+    'Sales and Service Occupations',
+    'Trades, Transport and Equipment Operators and Related Occupations',
+    'Natural Resources, Agriculture and Related Production Occupations',
+    'Occupations in Manufacturing and Utilities',
+    'Unclassified Occupations',
+]
 
 const PROVINCES = [
     "All", "Ontario", "Quebec", "British Columbia", "Alberta",
@@ -259,7 +265,7 @@ export default function FindOccupation() {
             <div style={styles.insightGrid}>
               <InsightCard label="PEAK EMPLOYMENT" value={peak.toLocaleString() + "k"} />
               <InsightCard label="FINAL COUNT"     value={last.toLocaleString() + "k"} delta={delta} />
-              <InsightCard label="TREND"           value={delta > 10 ? "📈 Growing" : delta < -10 ? "📉 Declining" : "➡ Stable"} />
+              <InsightCard label="TREND"           value={delta > 10 ? "Growing" : delta < -10 ? "Declining" : "➡ Stable"} />
             </div>
 
             {/* Area chart */}
