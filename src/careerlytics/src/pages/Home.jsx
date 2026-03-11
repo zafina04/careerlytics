@@ -21,52 +21,50 @@ function useFadeUp(delay = 0) {
 
 // ── Nav pages ─────────────────────────────────────────────────────────────────
 const NAV_PAGES = [
-  { route: '/dashboard', icon: '📋', label: 'Find Occupations',  desc: 'Live postings across Canada',         color: '#2563eb', light: '#eff6ff' },
-  { route: '/insight',   icon: '📈', label: 'Career Insight', desc: 'Trends & growth over time',           color: '#0284c7', light: '#e0f2fe' },
-  { route: '/compare',   icon: '⚖️',  label: 'Compare Career', desc: 'Side-by-side career analysis',       color: '#059669', light: '#ecfdf5' },
-  { route: '/about',     icon: '🙋', label: 'About Us',       desc: 'Our data, team & mission',            color: '#7c3aed', light: '#f5f3ff' },
+  { route: '/dashboard', icon: '', label: 'Find Occupations',  desc: 'Live postings across Canada',         color: '#2563eb', light: '#eff6ff' },
+  { route: '/insight',   icon: '', label: 'Career Insight', desc: 'Trends & growth over time',           color: '#0284c7', light: '#e0f2fe' },
+  { route: '/compare',   icon: '',  label: 'Compare Career', desc: 'Side-by-side career analysis',       color: '#059669', light: '#ecfdf5' },
+  { route: '/about',     icon: '', label: 'About Us',       desc: 'Our data, team & mission',            color: '#7c3aed', light: '#f5f3ff' },
 ]
 
 // ── Hover card ────────────────────────────────────────────────────────────────
 function NavCard({ page, delay, navigate }) {
-  const ref = useFadeUp(delay)
-  const [hovered, setHovered] = useState(false)
-
-  return (
-    <div
-      ref={ref}
-      onClick={() => navigate(page.route)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        ...s.card,
-        background: hovered ? page.color : '#fff',
-        borderColor: hovered ? page.color : '#e2e8f0',
-        transform: hovered ? 'translateY(-4px) scale(1.01)' : 'translateY(0) scale(1)',
-        boxShadow: hovered ? `0 16px 36px ${page.color}33` : '0 2px 8px rgba(0,0,0,0.04)',
-      }}
-    >
-      <div style={{
-        ...s.cardIcon,
-        background: hovered ? 'rgba(255,255,255,0.18)' : page.light,
-      }}>
-        {page.icon}
-      </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ ...s.cardLabel, color: hovered ? '#fff' : '#0f172a' }}>
-          {page.label}
+    const ref = useFadeUp(delay)
+    const [hovered, setHovered] = useState(false)
+  
+    return (
+      <div
+        ref={ref}
+        onClick={() => navigate(page.route)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          ...s.card,
+          background: hovered ? 'rgba(201,168,76,0.07)' : '#0d0e1a',
+          borderColor: hovered ? 'rgba(201,168,76,0.35)' : '#1e2035',
+          transform: hovered ? 'translateY(-4px) scale(1.01)' : 'translateY(0) scale(1)',
+          boxShadow: hovered ? '0 16px 36px rgba(201,168,76,0.12)' : '0 2px 8px rgba(0,0,0,0.2)',
+        }}
+      >
+        <div style={{ flex: 1 }}>
+          <div style={s.cardIconEmoji}>{page.icon}</div>
+          <div style={{ ...s.cardLabel, color: hovered ? '#e8c97a' : '#c9a84c' }}>
+            {page.label}
+          </div>
+          <div style={{ ...s.cardDesc, color: hovered ? '#8a8fa8' : '#4a4f6a' }}>
+            {page.desc}
+          </div>
         </div>
-        <div style={{ ...s.cardDesc, color: hovered ? 'rgba(255,255,255,0.75)' : '#94a3b8' }}>
-          {page.desc}
+        <div style={{
+          ...s.cardArrow,
+          color: hovered ? 'rgba(201,168,76,0.9)' : '#2e3050',
+          transform: hovered ? 'translate(2px,-2px)' : 'none',
+        }}>
+          ↗
         </div>
       </div>
-      <div style={{ ...s.cardArrow, color: hovered ? 'rgba(255,255,255,0.9)' : '#cbd5e1',
-        transform: hovered ? 'translate(2px,-2px)' : 'none' }}>
-        ↗
-      </div>
-    </div>
-  )
-}
+    )
+  }
 
 // ── Main Home ─────────────────────────────────────────────────────────────────
 export default function Home() {
@@ -236,10 +234,9 @@ const s = {
         margin: 0,
     },
       h1Accent: {
-        background: `linear-gradient(135deg, ${GOLD} 0%, ${GOLD_LIGHT} 60%, #f5dfa0 100%)`,
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
+        
+        color: '#e8c97a',
+
     },
     
     sub: {
@@ -301,39 +298,46 @@ const s = {
     
     // Individual card
     card: {
-        display: 'flex', alignItems: 'center', gap: '0.9rem',
-        padding: '1.1rem 1.2rem',
-        borderRadius: 10,
-        background: BG_CARD,
-        border: `1px solid ${BG_BORDER}`,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '1.75rem',
+        borderRadius: 14,
+        border: '1px solid #1e2035',
         cursor: 'pointer',
         transition: 'all 0.22s cubic-bezier(0.34,1.2,0.64,1)',
         userSelect: 'none',
+        minHeight: 180,
     },
-    cardIcon: {
-        width: 40, height: 40, borderRadius: 8,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '1.1rem', flexShrink: 0,
-        background: GOLD_DIM,
-        transition: 'background 0.22s',
+    cardIconEmoji: {
+        fontSize: 28,
+        marginBottom: '0.75rem',
     },
     cardLabel: {
         fontFamily: "'Playfair Display', serif",
-        fontSize: '0.9rem', fontWeight: 700,
-        color: GOLD_LIGHT,
-        letterSpacing: '-0.01em', lineHeight: 1.2,
+        fontSize: '1.05rem',
+        fontWeight: 700,
+        lineHeight: 1.2,
+        marginBottom: '0.4rem',
         transition: 'color 0.22s',
     },
     cardDesc: {
-        fontSize: '0.72rem', marginTop: '0.2rem',
-        color: TEXT_MUTED,
+        fontSize: '0.83rem',
         fontFamily: "'DM Sans', sans-serif",
-        lineHeight: 1.4, transition: 'color 0.22s',
+        lineHeight: 1.6,
+        transition: 'color 0.22s',
     },
     cardArrow: {
-        fontSize: '1rem', flexShrink: 0,
-        color: TEXT_MUTED,
+        fontSize: '1rem',
+        flexShrink: 0,
+        alignSelf: 'flex-end',
         transition: 'transform 0.2s, color 0.2s',
+    },
+    cardGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '1.25rem',
+        width: '100%',
     },
 
   

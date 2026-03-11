@@ -26,7 +26,6 @@ body {
   color: var(--text);
   overflow-x: hidden;
 }
-
 /* ── Navbar ─────────────────────────────────────────────────────────────────── */
 .navbar {
   position: sticky;
@@ -36,16 +35,16 @@ body {
   align-items: center;
   height: 60px;
   padding: 0 2.5rem;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(8, 8, 16, 0.92);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #1e2035;
 }
 
 .logo {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
   font-size: 1.15rem;
-  color: var(--blue-brand);
+  color: #c9a84c;
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -57,8 +56,9 @@ body {
   display: inline-block;
   width: 9px;
   height: 9px;
-  background: var(--blue-brand);
+  background: #c9a84c;
   border-radius: 50%;
+  box-shadow: 0 0 8px #c9a84c;
   animation: pulse 2.2s ease-in-out infinite;
 }
 
@@ -71,7 +71,8 @@ body {
 .nav-links a {
   font-size: 0.84rem;
   font-weight: 500;
-  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  color: #4a4f6a;
   text-decoration: none;
   padding: 0.45rem 0.9rem;
   border-radius: 6px;
@@ -79,14 +80,14 @@ body {
 }
 
 .nav-links a:hover {
-  color: var(--text);
-  background: var(--blue-wash);
+  color: #e8c97a;
+  background: rgba(201, 168, 76, 0.08);
 }
 
-/* React Router adds .active to the matched NavLink */
 .nav-links a.active {
-  color: var(--blue-brand);
-  background: var(--blue-wash);
+  color: #c9a84c;
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid rgba(201, 168, 76, 0.2);
 }
 
 /* ── Animations ─────────────────────────────────────────────────────────────── */
