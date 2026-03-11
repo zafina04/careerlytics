@@ -22,13 +22,13 @@ function Navbar() {
   return (
     <nav className="navbar">
       <NavLink to="/" className="logo">
-        <span className="logo-pulse" />
+        <img src="/logo.png" alt="Careerlytics" style={{ height: 180, width: 'auto' }} />
         Careerlytics
       </NavLink>
       <ul className="nav-links">
         <li><NavLink to="/"             end>Home</NavLink></li>
         <li><NavLink to="/dashboard"       >Job Dashboard</NavLink></li>
-        <li><NavLink to="/insight"         >Career Insight</NavLink></li>
+        <li><NavLink to="/chatbot"         >Historical Chatbot</NavLink></li>
         <li><NavLink to="/compare"         >Compare Career</NavLink></li>
         <li><NavLink to="/about"           >About Us</NavLink></li>
       </ul>
@@ -44,7 +44,7 @@ export default function App() {
       <Routes>
         <Route path="/"          element={<Home />} />
         <Route path="/dashboard" element={<FindOccupation />} />
-        <Route path="/insight"   element={<Placeholder title="Career Insight" />} />
+        <Route path="/insight"   element={<Placeholder title="Historical Chatbot" />} />
         <Route path="/compare"   element={<Placeholder title="Compare Career" />} />
         <Route path="/about"     element={<Placeholder title="About Us" />} />
       </Routes>

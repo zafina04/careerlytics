@@ -22,7 +22,7 @@ function useFadeUp(delay = 0) {
 // ── Nav pages ─────────────────────────────────────────────────────────────────
 const NAV_PAGES = [
   { route: '/dashboard', icon: '', label: 'Find Occupations',  desc: 'Live postings across Canada',         color: '#2563eb', light: '#eff6ff' },
-  { route: '/insight',   icon: '', label: 'Career Insight', desc: 'Trends & growth over time',           color: '#0284c7', light: '#e0f2fe' },
+  { route: '/chatbot',   icon: '', label: 'Historical Chatbot', desc: 'Trends & growth over time',           color: '#0284c7', light: '#e0f2fe' },
   { route: '/compare',   icon: '',  label: 'Compare Career', desc: 'Side-by-side career analysis',       color: '#059669', light: '#ecfdf5' },
   { route: '/about',     icon: '', label: 'About Us',       desc: 'Our data, team & mission',            color: '#7c3aed', light: '#f5f3ff' },
 ]
@@ -104,8 +104,8 @@ export default function Home() {
             </h1>
   
             <p ref={subRef} style={s.sub}>
-              Explore historical occupation trends across every Canadian province —
-              see how industries rose, shifted, and evolved over nearly four decades.
+              Explore historical occupation trends across every Canadian province.
+              See how industries rose, shifted, and evolved over nearly four decades from 1987 to 2025.
             </p>
   
             <div ref={btnRef} style={s.btnRow}>
@@ -113,7 +113,7 @@ export default function Home() {
                 style={{ ...s.btnPrimary, ...(primaryHover ? s.btnPrimaryHover : {}) }}
                 onMouseEnter={() => setPrimaryHover(true)}
                 onMouseLeave={() => setPrimaryHover(false)}
-                onClick={() => navigate('/insight')}
+                onClick={() => navigate('/chatbot')}
               >
                 Explore Trends →
               </button>
@@ -171,7 +171,7 @@ const s = {
         
         position: 'absolute',
         width: 700, height: 700, borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%)`,
+        //background: `radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 40%)`,
         top: -200, left: -200, pointerEvents: 'none',
     },
     bgOrb2: {
@@ -234,7 +234,7 @@ const s = {
         margin: 0,
     },
       h1Accent: {
-        
+
         color: '#e8c97a',
 
     },
