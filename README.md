@@ -2,6 +2,14 @@
 
 **Purpose:** This repository is the starter *template* for student project repositories. In GitHub Classroom we will use this template so each group gets a well-organized repo with instructions, a design doc, a src folder, etc.
 
+--HOW TO RUN
+
+cd project-setup-g12-ios-update
+cd src
+cd careerlytics
+cd src
+npm run dev
+
 ---
 
 ## What to edit after your repo is created
