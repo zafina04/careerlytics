@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import FindOccupation from './pages/FindOccupation'
 
 import Histrocial from './pages/Historical'
+import AboutUs from './pages/AboutUs'
 
 
 // ── Placeholder pages (we'll build these next) ──────────────────────────────
@@ -50,7 +51,7 @@ export default function App() {
         <Route path="/insight"   element={<Histrocial/>} />
         <Route path="/chatbot"   element={<Placeholder title="Historical Chatbot" />} />
         <Route path="/compare"   element={<Placeholder title="Compare Career" />} />
-        <Route path="/about"     element={<Placeholder title="About Us" />} />
+        <Route path="/about"     element={<AboutUs/>} />
       </Routes>
     </>
   )
