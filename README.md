@@ -2,6 +2,16 @@
 
 **Purpose:** This repository is the starter *template* for student project repositories. In GitHub Classroom we will use this template so each group gets a well-organized repo with instructions, a design doc, a src folder, etc.
 
+--HOW TO RUN
+
+1. cd project-setup-g12-ios-update
+2. cd src
+3. cd careerlytics
+4. cd src
+5. npm install
+6. npm install recharts
+7. npm run dev
+
 ---
 
 ## What to edit after your repo is created
@@ -12,7 +22,7 @@
 5. Put code in `src/`, tests in `tests/`, and update `requirements.txt` if needed.
 
 ---
-
+ 
 ## Team information
 - Team name: 
 - Team members: Mahibah, Harishan, Harsh, Syed, Kajaanan, Jiya, Duaa, Zafina
