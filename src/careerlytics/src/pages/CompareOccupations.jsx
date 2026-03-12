@@ -1,0 +1,690 @@
+import { useState } from 'react'
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Legend
+} from "recharts";
+
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+
+const OCCUPATIONS = [
+  'Management Occupations',
+  'Business, Finance and Administration Occupations',
+  'Natural and Applied Sciences and Related Occupations',
+  'Health Occupations, except management',
+  'Occupations in Education, Law and Social, Community and Government Services',
+  'Occupations in Art, Culture, Recreation and Sport',
+  'Sales and Service Occupations',
+  'Trades, Transport and Equipment Operators and Related Occupations',
+  'Natural Resources, Agriculture and Related Production Occupations',
+  'Occupations in Manufacturing and Utilities',
+  'Unclassified Occupations',
+];
+
+const PROVINCES = [
+  "All", "Ontario", "Quebec", "British Columbia", "Alberta",
+  "Manitoba", "Saskatchewan", "Nova Scotia", "New Brunswick",
+  "Newfoundland and Labrador", "Prince Edward Island",
+];
+
+const CHART_COLORS = ["#c9a84c", "#4e8cff"];
+
+// ─── MOCK DATA ────────────────────────────────────────────────────────────────
+
+function buildMockSeries(occ, yearStart, yearEnd) {
+  // Replace with: fetch(`/api/trend/${occ}?year_start=${yearStart}&year_end=${yearEnd}`)
+  const hash  = occ.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const start = (hash % 300) + 100;
+  const end   = start * (0.6 + (hash % 10) * 0.08);
+  const years = [];
+  for (let y = yearStart; y <= yearEnd; y += 4) years.push(y);
+  return years.map((year, i) => ({
+    year,
+    workers: Math.round(start + ((end - start) / (years.length - 1)) * i),
+  }));
+}
+
+// ─── ML: COSINE SIMILARITY ────────────────────────────────────────────────────
+
+function cosineSimilarity(occ1, occ2, yearStart, yearEnd) {
+  const s1 = buildMockSeries(occ1, yearStart, yearEnd).map(d => d.workers);
+  const s2 = buildMockSeries(occ2, yearStart, yearEnd).map(d => d.workers);
+  const dot    = s1.reduce((sum, v, i) => sum + v * s2[i], 0);
+  const mag1   = Math.sqrt(s1.reduce((sum, v) => sum + v * v, 0));
+  const mag2   = Math.sqrt(s2.reduce((sum, v) => sum + v * v, 0));
+  return Math.round((dot / (mag1 * mag2)) * 100);
+}
+
+function similarityLabel(score) {
+  if (score >= 90) return { label: "Nearly Identical Trajectories", color: "#50e3a4" };
+  if (score >= 70) return { label: "Strongly Correlated Growth",    color: "#50e3a4" };
+  if (score >= 50) return { label: "Moderately Similar Patterns",   color: "#c9a84c" };
+  if (score >= 30) return { label: "Weakly Correlated",             color: "#c9a84c" };
+  return             { label: "Divergent Trajectories",             color: "#ff6b6b" };
+}
+
+// ─── HELPER COMPONENTS ────────────────────────────────────────────────────────
+
+function SidePanel({ children }) {
+  return <div style={styles.sidePanel}>{children}</div>;
+}
+
+function FilterLabel({ children }) {
+  return <div style={styles.filterLabel}>{children}</div>;
+}
+
+function OccupationList({ selected, onToggle, max = 2, occupations }) {
+  return (
+    <div>
+      <FilterLabel>Occupation — Select Two</FilterLabel>
+      <div style={styles.occListBox}>
+        {occupations.map(o => {
+          const isSelected = selected.includes(o);
+          const isDisabled = !isSelected && selected.length >= max;
+          const colorIdx   = selected.indexOf(o);
+          return (
+            <label key={o} style={{
+              ...styles.occItem,
+              cursor:     isDisabled ? "not-allowed" : "pointer",
+              opacity:    isDisabled ? 0.35 : 1,
+              background: isSelected ? "rgba(201,168,76,.1)" : "transparent",
+            }}>
+              <div style={{
+                ...styles.checkbox,
+                border:     isSelected ? "none" : "1px solid #2e3050",
+                background: isSelected ? CHART_COLORS[colorIdx] : "transparent",
+              }}>
+                {isSelected && <div style={styles.checkboxInner} />}
+              </div>
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => !isDisabled && onToggle(o)}
+                style={{ display: "none" }}
+              />
+              <span style={{ ...styles.occLabel, color: isSelected ? "#e8c97a" : "#8a8fa8" }}>
+                {o}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ProvinceSelect({ value, onChange, provinces }) {
+  return (
+    <div>
+      <FilterLabel>Province</FilterLabel>
+      <select value={value} onChange={e => onChange(e.target.value)} style={styles.select}>
+        {provinces.map(p => <option key={p}>{p}</option>)}
+      </select>
+    </div>
+  );
+}
+
+function YearRange({ value, onChange }) {
+  const MIN = 1987;
+  const MAX = 2025;
+
+  const pctStart = ((value[0] - MIN) / (MAX - MIN)) * 100;
+  const pctEnd   = ((value[1] - MIN) / (MAX - MIN)) * 100;
+
+  const handleStart = e => {
+    const v = Math.min(Number(e.target.value), value[1] - 1);
+    onChange([v, value[1]]);
+  };
+
+  const handleEnd = e => {
+    const v = Math.max(Number(e.target.value), value[0] + 1);
+    onChange([value[0], v]);
+  };
+
+  return (
+    <div>
+      <FilterLabel>Year Range: {value[0]} - {value[1]}</FilterLabel>
+      <style>{`
+        .yr-thumb { position:absolute; top:0; left:0; width:100%; height:100%; appearance:none; -webkit-appearance:none; background:transparent; pointer-events:none; }
+        .yr-thumb::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#c9a84c; border:2px solid #080810; cursor:pointer; pointer-events:all; box-shadow:0 0 0 3px rgba(201,168,76,.2); transition: box-shadow .15s; }
+        .yr-thumb::-webkit-slider-thumb:hover { box-shadow:0 0 0 5px rgba(201,168,76,.3); }
+        .yr-thumb::-moz-range-thumb { width:14px; height:14px; border-radius:50%; background:#c9a84c; border:2px solid #080810; cursor:pointer; pointer-events:all; }
+        .yr-thumb::-webkit-slider-runnable-track { background:transparent; }
+        .yr-thumb::-moz-range-track { background:transparent; }
+      `}</style>
+      <div style={{ position:"relative", height:28, marginTop:10, marginBottom:4 }}>
+        <div style={{
+          position:"absolute", top:"50%", left:0, right:0,
+          height:3, borderRadius:2, background:"#1e2035",
+          transform:"translateY(-50%)", pointerEvents:"none",
+        }} />
+        <div style={{
+          position:"absolute", top:"50%",
+          left:`${pctStart}%`,
+          width:`${pctEnd - pctStart}%`,
+          height:3, borderRadius:2,
+          background:"linear-gradient(90deg, #c9a84c, #e8c97a)",
+          transform:"translateY(-50%)", pointerEvents:"none",
+        }} />
+        <input
+          type="range" min={MIN} max={MAX} step={1} value={value[0]}
+          onChange={handleStart}
+          className="yr-thumb"
+          style={{ zIndex: value[0] >= MAX - 5 ? 5 : 3 }}
+        />
+        <input
+          type="range" min={MIN} max={MAX} step={1} value={value[1]}
+          onChange={handleEnd}
+          className="yr-thumb"
+          style={{ zIndex: 4 }}
+        />
+      </div>
+      <div style={{ display:"flex", justifyContent:"space-between", marginTop:2 }}>
+        <span style={styles.yearEndLabel}>{MIN}</span>
+        <span style={styles.yearEndLabel}>{MAX}</span>
+      </div>
+    </div>
+  );
+}
+
+function ActionBtn({ children, onClick, variant = "primary" }) {
+  return (
+    <button onClick={onClick} style={{
+      ...styles.actionBtn,
+      background: variant === "primary" ? "linear-gradient(135deg,#c9a84c,#e8c97a)" : "transparent",
+      color:      variant === "primary" ? "#0a0a0f" : "#4a4f6a",
+      border:     variant === "secondary" ? "1px solid #1e2035" : "none",
+    }}>
+      {children}
+    </button>
+  );
+}
+
+// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
+
+export default function CompareOccupations() {
+  const [selected,  setSelected]  = useState([]);
+  const [province,  setProvince]  = useState("All");
+  const [yearRange, setYearRange] = useState([1987, 2025]);
+  const [compared,  setCompared]  = useState(null);
+
+  const toggleOcc = o =>
+    setSelected(prev =>
+      prev.includes(o) ? prev.filter(x => x !== o) : prev.length < 2 ? [...prev, o] : prev
+    );
+
+  const handleYearClick = range => setYearRange(range);
+
+  const compare = () => {
+    if (selected.length === 2) setCompared({ occs: selected, province, yearRange });
+  };
+
+  const reset = () => {
+    setSelected([]);
+    setCompared(null);
+    setProvince("All");
+    setYearRange([1987, 2025]);
+  };
+
+  // Build merged chart data for both occupations
+  const chartData = compared ? (() => {
+    const s1 = buildMockSeries(compared.occs[0], compared.yearRange[0], compared.yearRange[1]);
+    const s2 = buildMockSeries(compared.occs[1], compared.yearRange[0], compared.yearRange[1]);
+    return s1.map((d, i) => ({
+      year: d.year,
+      [compared.occs[0]]: d.workers,
+      [compared.occs[1]]: s2[i]?.workers || 0,
+    }));
+  })() : [];
+
+  // ML similarity score
+  const similarity = compared
+    ? cosineSimilarity(compared.occs[0], compared.occs[1], compared.yearRange[0], compared.yearRange[1])
+    : null;
+  const simLabel = similarity !== null ? similarityLabel(similarity) : null;
+
+  return (
+    <div style={styles.page}>
+
+      {/* ── SIDEBAR ── */}
+      <SidePanel>
+        <OccupationList
+          selected={selected}
+          onToggle={toggleOcc}
+          max={2}
+          occupations={OCCUPATIONS}
+        />
+        <ProvinceSelect
+          value={province}
+          onChange={setProvince}
+          provinces={PROVINCES}
+        />
+        <YearRange value={yearRange} onChange={handleYearClick} />
+        <div style={styles.selectedCount}>
+          {selected.length}/2 occupations selected
+        </div>
+        <div style={styles.sideFooter}>
+          <ActionBtn onClick={reset} variant="secondary">Reset</ActionBtn>
+          <ActionBtn onClick={compare}>Compare</ActionBtn>
+        </div>
+      </SidePanel>
+
+      {/* ── MAIN CONTENT ── */}
+      <div style={styles.mainPanel}>
+        {!compared ? (
+
+          /* Empty state */
+          <div style={styles.emptyState}>
+        
+            <div style={styles.emptyTitle}>Select Two Occupations to Compare</div>
+            <div style={styles.emptySubtitle}>select exactly two occupations · set province · compare</div>
+          </div>
+
+        ) : (
+
+          /* Results */
+          <div style={styles.resultStack}>
+
+            {/* Heading */}
+            <div>
+              <div style={styles.sectionTag}>COMPARATIVE ANALYSIS</div>
+              <h2 style={styles.resultTitle}>
+                {compared.occs[0]}
+                <span style={styles.vsLabel}> vs </span>
+                {compared.occs[1]}
+              </h2>
+              <div style={styles.resultSubtitle}>
+                {compared.province} · {compared.yearRange[0]}–{compared.yearRange[1]}
+              </div>
+            </div>
+
+            {/* Stat cards */}
+            <div style={styles.statGrid}>
+              {compared.occs.map((occ, i) => {
+                const s     = buildMockSeries(occ, compared.yearRange[0], compared.yearRange[1]);
+                const first = s[0]?.workers || 0;
+                const last  = s[s.length - 1]?.workers || 0;
+                const delta = first ? Math.round(((last - first) / first) * 100) : 0;
+                return (
+                  <div key={occ} style={{ ...styles.statCard, borderColor: CHART_COLORS[i] + "55" }}>
+                    <div style={{ ...styles.statOccLabel, color: CHART_COLORS[i] }}>
+                      {occ.toUpperCase()}
+                    </div>
+                    <div style={styles.statValue}>{last.toLocaleString()}k</div>
+                    <div style={{ ...styles.statDelta, color: delta >= 0 ? "#50e3a4" : "#ff6b6b" }}>
+                      {delta >= 0 ? "▲" : "▼"} {Math.abs(delta)}% over period
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Dual line chart */}
+            <div style={styles.card}>
+              <div style={styles.cardLabel}>SIDE-BY-SIDE TREND COMPARISON</div>
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
+                  <XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick} />
+                  <YAxis stroke="#4a4f6a" tick={styles.chartTick}
+                    tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
+                  <Tooltip contentStyle={styles.tooltipBox} />
+                  <Legend wrapperStyle={{ fontFamily: "'DM Sans',sans-serif", fontSize: 12 }} />
+                  {compared.occs.map((occ, i) => (
+                    <Line
+                      key={occ}
+                      type="monotone"
+                      dataKey={occ}
+                      stroke={CHART_COLORS[i]}
+                      strokeWidth={2}
+                      dot={{ r: 3, fill: CHART_COLORS[i] }}
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* ML similarity score */}
+            <div style={styles.card}>
+              <div style={styles.cardLabel}>ML INSIGHT — COSINE SIMILARITY SCORE</div>
+              <div style={styles.simRow}>
+
+                {/* Score gauge */}
+                <div style={styles.simScoreWrap}>
+                  <div style={{ ...styles.simScore, color: simLabel.color }}>
+                    {similarity}%
+                  </div>
+                  <div style={{ ...styles.simScoreLabel, color: simLabel.color }}>
+                    {simLabel.label}
+                  </div>
+                </div>
+
+                {/* Bar */}
+                <div style={styles.simBarWrap}>
+                  <div style={styles.simBarTrack}>
+                    <div style={{
+                      ...styles.simBarFill,
+                      width:      `${similarity}%`,
+                      background: simLabel.color,
+                    }} />
+                  </div>
+                  <div style={styles.simBarLabels}>
+                    <span>0% Divergent</span>
+                    <span>100% Identical</span>
+                  </div>
+
+                  {/* Explanation */}
+                  <div style={styles.simText}>
+                    {similarity >= 70
+                      ? `${compared.occs[0]} and ${compared.occs[1]} show strongly correlated workforce trends — likely driven by shared economic cycles or overlapping industry demand.`
+                      : similarity >= 40
+                      ? `These occupations show moderate similarity. While they share some growth patterns, divergence points suggest exposure to different technological or policy forces.`
+                      : `${compared.occs[0]} and ${compared.occs[1]} have largely divergent trajectories. Our K-Means model places them in separate clusters, indicating distinct economic drivers.`
+                    }
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── STYLES ──────────────────────────────────────────────────────────────────
+
+const styles = {
+
+  // Page
+  page: {
+    display:   "flex",
+    minHeight: "100vh",
+    overflow:  "hidden",
+  },
+
+  // Sidebar
+  sidePanel: {
+    width:         280,
+    minWidth:      280,
+    background:    "#0d0e1a",
+    borderRight:   "1px solid #1e2035",
+    padding:       "1.5rem 1.25rem",
+    display:       "flex",
+    flexDirection: "column",
+    gap:           "1.25rem",
+    overflowY:     "auto",
+  },
+  sideFooter: {
+    display: "flex",
+    gap:     8,
+  },
+  selectedCount: {
+    fontSize:   "0.75rem",
+    color:      "#2e3050",
+    fontFamily: "'DM Mono',monospace",
+    textAlign:  "center",
+    marginTop:  "auto",
+  },
+
+  // Filter label
+  filterLabel: {
+    fontSize:      "0.7rem",
+    color:         "#4a4f6a",
+    letterSpacing: ".1em",
+    textTransform: "uppercase",
+    fontFamily:    "'DM Mono',monospace",
+    marginBottom:  6,
+  },
+
+  // Occupation list
+  occListBox: {
+    background:   "#0a0a0f",
+    border:       "1px solid #1e2035",
+    borderRadius: 8,
+    maxHeight:    220,
+    overflowY:    "auto",
+    padding:      "0.25rem",
+  },
+  occItem: {
+    display:      "flex",
+    alignItems:   "center",
+    gap:          10,
+    padding:      "6px 8px",
+    borderRadius: 6,
+    transition:   "background .15s",
+  },
+  occLabel: {
+    fontSize:   "0.82rem",
+    fontFamily: "'DM Sans',sans-serif",
+  },
+  checkbox: {
+    width:          14,
+    height:         14,
+    borderRadius:   3,
+    flexShrink:     0,
+    display:        "flex",
+    alignItems:     "center",
+    justifyContent: "center",
+  },
+  checkboxInner: {
+    width:        7,
+    height:       7,
+    background:   "#0a0a0f",
+    borderRadius: 1,
+  },
+
+  // Province dropdown
+  select: {
+    width:        "100%",
+    padding:      "8px 12px",
+    background:   "#0a0a0f",
+    border:       "1px solid #1e2035",
+    borderRadius: 8,
+    color:        "#c4c8e0",
+    fontFamily:   "'DM Sans',sans-serif",
+    fontSize:     "0.85rem",
+    cursor:       "pointer",
+    outline:      "none",
+  },
+
+  // Year range
+  yearEndLabel: {
+    fontSize:   "0.65rem",
+    color:      "#2e3050",
+    fontFamily: "'DM Mono',monospace",
+  },
+
+  // Action buttons
+  actionBtn: {
+    padding:       "9px 20px",
+    borderRadius:  8,
+    cursor:        "pointer",
+    fontFamily:    "'DM Sans',sans-serif",
+    fontSize:      "0.85rem",
+    fontWeight:    600,
+    letterSpacing: ".03em",
+    transition:    "all .2s",
+  },
+
+  // Main panel
+  mainPanel: {
+    flex:       1,
+    padding:    "2rem",
+    overflowY:  "auto",
+    background: "#080810",
+  },
+
+  // Empty state
+  emptyState: {
+    display:        "flex",
+    alignItems:     "center",
+    justifyContent: "center",
+    height:         "100%",
+    flexDirection:  "column",
+    gap:            12,
+  },
+  emptyIcon: {
+    width:          64,
+    height:         64,
+    borderRadius:   16,
+    background:     "rgba(201,168,76,.1)",
+    display:        "flex",
+    alignItems:     "center",
+    justifyContent: "center",
+    fontSize:       28,
+  },
+  emptyTitle: {
+    fontFamily: "'Playfair Display',serif",
+    fontSize:   "2.9rem",
+    color:      "#4a4f6a",
+  },
+  emptySubtitle: {
+    fontSize:   "0.8rem",
+    color:      "#2e3050",
+    fontFamily: "'DM Mono',monospace",
+  },
+
+  // Results
+  resultStack: {
+    display:       "flex",
+    flexDirection: "column",
+    gap:           "1.5rem",
+  },
+  sectionTag: {
+    fontSize:      "0.72rem",
+    color:         "#4a4f6a",
+    fontFamily:    "'DM Mono',monospace",
+    letterSpacing: ".1em",
+  },
+  resultTitle: {
+    fontFamily: "'Playfair Display',serif",
+    color:      "#e8c97a",
+    fontSize:   "1.6rem",
+    margin:     "4px 0 0",
+  },
+  vsLabel: {
+    color: "#2e3050",
+  },
+  resultSubtitle: {
+    fontSize:   "0.8rem",
+    color:      "#4a4f6a",
+    fontFamily: "'DM Mono',monospace",
+  },
+
+  // Stat cards
+  statGrid: {
+    display:             "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap:                 "1rem",
+  },
+  statCard: {
+    background:   "#0d0e1a",
+    border:       "1px solid",
+    borderRadius: 12,
+    padding:      "1.25rem",
+  },
+  statOccLabel: {
+    fontSize:      "0.65rem",
+    letterSpacing: ".1em",
+    fontFamily:    "'DM Mono',monospace",
+    marginBottom:  6,
+  },
+  statValue: {
+    fontSize:   "2rem",
+    fontFamily: "'Playfair Display',serif",
+    color:      "#e8c97a",
+  },
+  statDelta: {
+    fontSize:   "0.75rem",
+    fontFamily: "'DM Mono',monospace",
+    marginTop:  4,
+  },
+
+  // Generic card
+  card: {
+    background:   "#0d0e1a",
+    border:       "1px solid #1e2035",
+    borderRadius: 12,
+    padding:      "1.5rem",
+  },
+  cardLabel: {
+    fontSize:      "0.7rem",
+    color:         "#4a4f6a",
+    letterSpacing: ".1em",
+    fontFamily:    "'DM Mono',monospace",
+    marginBottom:  "1rem",
+  },
+
+  // Chart
+  chartTick: {
+    fontFamily: "'DM Mono',monospace",
+    fontSize:   11,
+  },
+  tooltipBox: {
+    background:   "#0d0e1a",
+    border:       "1px solid #1e2035",
+    borderRadius: 8,
+    fontFamily:   "'DM Sans',sans-serif",
+    color:        "#c4c8e0",
+  },
+
+  // Similarity score
+  simRow: {
+    display:    "flex",
+    gap:        "2rem",
+    alignItems: "flex-start",
+  },
+  simScoreWrap: {
+    display:        "flex",
+    flexDirection:  "column",
+    alignItems:     "center",
+    minWidth:       100,
+  },
+  simScore: {
+    fontSize:   "3rem",
+    fontFamily: "'Playfair Display',serif",
+    fontWeight: 700,
+    lineHeight: 1,
+  },
+  simScoreLabel: {
+    fontSize:   "0.65rem",
+    fontFamily: "'DM Mono',monospace",
+    marginTop:  6,
+    textAlign:  "center",
+    letterSpacing: ".05em",
+  },
+  simBarWrap: {
+    flex:          1,
+    display:       "flex",
+    flexDirection: "column",
+    gap:           8,
+  },
+  simBarTrack: {
+    height:       10,
+    background:   "#12131f",
+    borderRadius: 5,
+    overflow:     "hidden",
+  },
+  simBarFill: {
+    height:       "100%",
+    borderRadius: 5,
+    transition:   "width .6s ease",
+  },
+  simBarLabels: {
+    display:        "flex",
+    justifyContent: "space-between",
+    fontSize:       "0.62rem",
+    color:          "#2e3050",
+    fontFamily:     "'DM Mono',monospace",
+  },
+  simText: {
+    fontSize:   "0.85rem",
+    color:      "#8a8fa8",
+    fontFamily: "'DM Sans',sans-serif",
+    lineHeight: 1.6,
+    marginTop:  4,
+  },
+
+};

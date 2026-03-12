@@ -173,20 +173,19 @@ function EmploymentType({ value, onChange }) {
 function YearRange({ value, onChange }) {
   const MIN = 1987;
   const MAX = 2025;
-  const range = MAX - MIN;
+
+  const pctStart = ((value[0] - MIN) / (MAX - MIN)) * 100;
+  const pctEnd   = ((value[1] - MIN) / (MAX - MIN)) * 100;
 
   const handleStart = e => {
-    const v = Number(e.target.value);
-    if (v < value[1]) onChange([v, value[1]]);
+    const v = Math.min(Number(e.target.value), value[1] - 1);
+    onChange([v, value[1]]);
   };
 
   const handleEnd = e => {
-    const v = Number(e.target.value);
-    if (v > value[0]) onChange([value[0], v]);
+    const v = Math.max(Number(e.target.value), value[0] + 1);
+    onChange([value[0], v]);
   };
-
-  const pctStart = ((value[0] - MIN) / range) * 100;
-  const pctEnd   = ((value[1] - MIN) / range) * 100;
 
   return (
     <div>
@@ -199,20 +198,21 @@ function YearRange({ value, onChange }) {
         .yr-thumb::-webkit-slider-runnable-track { background:transparent; }
         .yr-thumb::-moz-range-track { background:transparent; }
       `}</style>
-      <div style={{ position: "relative", height: 28, marginTop: 10, marginBottom: 4 }}>
+      <div style={{ position:"relative", height:28, marginTop:10, marginBottom:4 }}>
         {/* Base track */}
         <div style={{
-          position: "absolute", top: "50%", left: 0, right: 0,
-          height: 3, borderRadius: 2, background: "#1e2035",
-          transform: "translateY(-50%)", pointerEvents: "none",
+          position:"absolute", top:"50%", left:0, right:0,
+          height:3, borderRadius:2, background:"#1e2035",
+          transform:"translateY(-50%)", pointerEvents:"none",
         }} />
         {/* Active fill */}
         <div style={{
-          position: "absolute", top: "50%",
-          left: `${pctStart}%`,
-          width: `${pctEnd - pctStart}%`,
-          height: 3, borderRadius: 2, background: "linear-gradient(90deg, #c9a84c, #e8c97a)",
-          transform: "translateY(-50%)", pointerEvents: "none",
+          position:"absolute", top:"50%",
+          left:`${pctStart}%`,
+          width:`${pctEnd - pctStart}%`,
+          height:3, borderRadius:2,
+          background:"linear-gradient(90deg, #c9a84c, #e8c97a)",
+          transform:"translateY(-50%)", pointerEvents:"none",
         }} />
         <input
           type="range" min={MIN} max={MAX} step={1} value={value[0]}
@@ -227,14 +227,15 @@ function YearRange({ value, onChange }) {
           style={{ zIndex: 4 }}
         />
       </div>
-      {/* Min/max labels */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", marginTop:2 }}>
         <span style={styles.yearEndLabel}>{MIN}</span>
         <span style={styles.yearEndLabel}>{MAX}</span>
       </div>
     </div>
   );
 }
+
+
 
 function ActionBtn({ children, onClick, variant = "primary" }) {
   return (
@@ -402,10 +403,10 @@ export default function FindOccupation() {
                 <div style={{ ...styles.mlText, marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
                   <span style={styles.cardLabel}>ML INSIGHT — TREND CLASSIFICATION &nbsp;</span>
                   {delta < -30
-                    ? `K-Means clustering places ${applied.occ} in the Technological Displacement cluster — rapid decline following mechanisation or infrastructure change.`
+                    ? `K-Means clustering places ${applied.occ} in the Technological Displacement cluster, rapid decline following mechanisation or infrastructure change.`
                     : delta > 20
-                    ? `Trend detection classifies ${applied.occ} as Sustained Growth — driven by urbanisation, policy shifts, or industrial expansion.`
-                    : `${applied.occ} is Cyclically Stable — fluctuating with economic cycles but maintaining structural presence.`
+                    ? `Trend detection classifies ${applied.occ} as Sustained Growth, driven by urbanisation, policy shifts, or industrial expansion.`
+                    : `${applied.occ} is Cyclically Stable, fluctuating with economic cycles but maintaining structural presence.`
                   }
                 </div>
               </div>
@@ -533,7 +534,8 @@ const styles = {
   },
 
   yearEndLabel: {
-    fontSize: "0.65rem", color: "#2e3050",
+    fontSize:   "0.65rem",
+    color:      "#2e3050",
     fontFamily: "'DM Mono',monospace",
   },
 

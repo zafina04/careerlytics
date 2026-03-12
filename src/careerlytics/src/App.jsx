@@ -7,6 +7,8 @@ import Histrocial from './pages/Historical'
 import AboutUs from './pages/AboutUs'
 import ChatBot from './pages/ChatBot'
 
+import CompareOccupations from './pages/CompareOccupations'
+
 // ── Placeholder pages (we'll build these next) ──────────────────────────────
 const Placeholder = ({ title }) => (
   <div style={{
@@ -49,7 +51,7 @@ export default function App() {
         <Route path="/dashboard" element={<FindOccupation />} />
         <Route path="/insight"   element={<Histrocial/>} />
         <Route path="/chatbot"   element={<ChatBot/>} />
-        <Route path="/compare"   element={<Placeholder title="Compare Career" />} />
+        <Route path="/compare"   element={<CompareOccupations/>} />
         <Route path="/about"     element={<AboutUs/>} />
       </Routes>
     </>
