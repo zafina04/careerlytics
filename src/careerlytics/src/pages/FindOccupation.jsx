@@ -381,7 +381,7 @@ export default function FindOccupation() {
 
             {activeTab === "trend" && (
               <div style={styles.card}>
-                <div style={styles.cardLabel}>WORKFORCE OVER TIME (absolute)</div>
+                <div style={styles.cardLabel}>WORKFORCE OVER TIME </div>
                 <ResponsiveContainer width="100%" height={260}>
                   <AreaChart data={chartData}>
                     <defs>
@@ -417,7 +417,7 @@ export default function FindOccupation() {
                 <div style={styles.cardLabel}>SHARE OF TOTAL WORKFORCE — ALL OCCUPATIONS (%)</div>
                 <div style={styles.shareNote}>
                   Relative share corrects for population growth. A falling share means this occupation
-                  is growing <em>slower</em> than the overall workforce — even if absolute numbers rise.
+                  is growing <em>slower</em> than the overall workforce, even if absolute numbers rise.
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={shareData}>
