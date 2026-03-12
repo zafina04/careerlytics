@@ -403,10 +403,10 @@ export default function FindOccupation() {
                 <div style={{ ...styles.mlText, marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
                   <span style={styles.cardLabel}>ML INSIGHT — TREND CLASSIFICATION &nbsp;</span>
                   {delta < -30
-                    ? `K-Means clustering places ${applied.occ} in the Technological Displacement cluster — rapid decline following mechanisation or infrastructure change.`
+                    ? `K-Means clustering places ${applied.occ} in the Technological Displacement cluster, rapid decline following mechanisation or infrastructure change.`
                     : delta > 20
-                    ? `Trend detection classifies ${applied.occ} as Sustained Growth — driven by urbanisation, policy shifts, or industrial expansion.`
-                    : `${applied.occ} is Cyclically Stable — fluctuating with economic cycles but maintaining structural presence.`
+                    ? `Trend detection classifies ${applied.occ} as Sustained Growth, driven by urbanisation, policy shifts, or industrial expansion.`
+                    : `${applied.occ} is Cyclically Stable, fluctuating with economic cycles but maintaining structural presence.`
                   }
                 </div>
               </div>
