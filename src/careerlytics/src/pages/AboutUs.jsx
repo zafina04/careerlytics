@@ -25,12 +25,11 @@ const AboutUs = () => {
         <p style={{ fontSize: "0.97rem", color: "#8a8fa8", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.85, marginBottom: "1.25rem" }}>
           Careerlytics is a university research initiative focused on{" "}
           <span style={{ color: "#c9a84c" }}>Archive Intelligence Mining</span> — the application of machine
-          learning techniques to historical Canadian census records spanning 1900 to 1970.
+          learning techniques to historical Canadian census records spanning 1987 to 2025.
         </p>
         <p style={{ fontSize: "0.97rem", color: "#8a8fa8", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.85, marginBottom: "1.25rem" }}>
           Our platform transforms raw occupational data into interactive visualizations and AI-powered insights,
-          revealing how Canada's labor market was shaped by industrialization, the World Wars, the Great Depression,
-          and the rise of the knowledge economy.
+          revealing how Canada's labor market was shaped.
         </p>
         <p style={{ fontSize: "0.97rem", color: "#8a8fa8", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.85 }}>
           Whether you're a researcher, historian, student, or curious explorer — Careerlytics gives you the tools
