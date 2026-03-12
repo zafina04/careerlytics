@@ -93,10 +93,7 @@ export default function Home() {
           {/* LEFT — Hero copy */}
           <div style={s.left}>
   
-            <div ref={tagRef} style={s.tag}>
-              <span style={s.tagDot} />
-              Canada's Job Intelligence Platform
-            </div>
+            
   
             <h1 ref={h1Ref} style={s.h1}>
               Welcome to<br />

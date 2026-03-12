@@ -275,12 +275,7 @@ export default function ChatBot() {
           display: "flex", alignItems: "center", justifyContent: "space-between"
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: "linear-gradient(135deg, rgba(106,183,167,0.3), rgba(201,168,76,0.2))",
-              border: "1px solid rgba(106,183,167,0.3)",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16
-            }}>🏛️</div>
+            
             <div>
               <div style={{ fontFamily: "'Playfair Display',serif", color: "#e8c97a", fontSize: "1.05rem", fontWeight: 700 }}>
                 Careerlytics

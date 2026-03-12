@@ -24,7 +24,7 @@ const AboutUs = () => {
         </h1>
         <p style={{ fontSize: "0.97rem", color: "#8a8fa8", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.85, marginBottom: "1.25rem" }}>
           Careerlytics is a university research initiative focused on{" "}
-          <span style={{ color: "#c9a84c" }}>Archive Intelligence Mining</span> — the application of machine
+          Archive Intelligence Mining, the application of machine
           learning techniques to historical Canadian census records spanning 1987 to 2025.
         </p>
         <p style={{ fontSize: "0.97rem", color: "#8a8fa8", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.85, marginBottom: "1.25rem" }}>
@@ -32,14 +32,14 @@ const AboutUs = () => {
           revealing how Canada's labor market was shaped.
         </p>
         <p style={{ fontSize: "0.97rem", color: "#8a8fa8", fontFamily: "'DM Sans',sans-serif", lineHeight: 1.85 }}>
-          Whether you're a researcher, historian, student, or curious explorer — Careerlytics gives you the tools
+          Whether you're a researcher, historian, student, or curious explorer, Careerlytics gives you the tools
           to understand how work itself has evolved across generations.
         </p>
 
         {/* Stat pills */}
         <div style={{ display: "flex", gap: "1rem", marginTop: "2.5rem", flexWrap: "wrap" }}>
           {[
-            ["70 Years", "of census data"],
+            ["38 Years", "of census data"],
             ["15+ Occupations", "tracked & modeled"],
             ["10 Provinces", "geographic coverage"],
             ["ML-Powered", "trend classification"],
@@ -147,14 +147,9 @@ const AboutUs = () => {
       }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-            <div style={{
-              width: 32, height: 32, background: "linear-gradient(135deg,#c9a84c,#e8c97a)",
-              borderRadius: "7px", display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 12, color: "#0a0a0f"
-            }}>CA</div>
-            <span style={{ fontFamily: "'Playfair Display',serif", color: "#e8c97a", fontSize: "1rem" }}>Careerlytics</span>
+            
           </div>
-          <div style={{ fontSize: "0.72rem", color: "#2e3050", fontFamily: "'DM Mono',monospace", marginBottom: 12 }}>© 2026 HIRE ME AI</div>
+          <div style={{ fontSize: "0.72rem", color: "#2e3050", fontFamily: "'DM Mono',monospace", marginBottom: 12 }}>© 2026 Careerlytics</div>
           <div style={{ display: "flex", gap: 8 }}>
             {["𝕏", "in", "gh", "✉"].map((s, i) => (
               <div key={i} style={{
