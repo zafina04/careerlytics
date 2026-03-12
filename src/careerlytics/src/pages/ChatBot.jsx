@@ -21,6 +21,7 @@ const DECADES = ['1980s', '1990s', '2000s', '2010s', '2020s'];
 // ─── Knowledge Base (NOC-aligned) ────────────────────────────────────────────
 
 
+
 const NOC_DATA = {
   management: {
     keywords: ['management', 'manager', 'executive', 'administrator', 'director', 'supervisor'],
@@ -140,6 +141,20 @@ function buildResponse(userMsg, history) {
       text: `That topic falls outside my scope. I'm specifically built on Statistics Canada's Labour Force Survey (LFS) data, classified by NOC categories, spanning 1987–2025. I can answer questions about any of these occupational categories:\n\n${OCCUPATIONS.slice(0, 6).map(o => `• ${o}`).join('\n')}\n\n...and more. What would you like to explore?`,
       type: 'out_of_scope'
     };
+  }
+
+  // Exact occupation name detection
+  for (const occ of OCCUPATIONS) {
+    if (m.includes(occ.toLowerCase())) {
+      const entry = Object.values(NOC_DATA).find(d => d.label === occ);
+      if (entry) {
+        return {
+          text: entry.responses.general + "\n\n" + entry.responses.followUp,
+          type: "noc_response",
+          nocCategory: occ
+        };
+      }
+    }
   }
 
   // Province detection

@@ -375,7 +375,7 @@ export default function CompareOccupations() {
                   {/* Explanation */}
                   <div style={styles.simText}>
                     {similarity >= 70
-                      ? `${compared.occs[0]} and ${compared.occs[1]} show strongly correlated workforce trends — likely driven by shared economic cycles or overlapping industry demand.`
+                      ? `${compared.occs[0]} and ${compared.occs[1]} show strongly correlated workforce trends, likely driven by shared economic cycles or overlapping industry demand.`
                       : similarity >= 40
                       ? `These occupations show moderate similarity. While they share some growth patterns, divergence points suggest exposure to different technological or policy forces.`
                       : `${compared.occs[0]} and ${compared.occs[1]} have largely divergent trajectories. Our K-Means model places them in separate clusters, indicating distinct economic drivers.`
