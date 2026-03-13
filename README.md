@@ -2,6 +2,8 @@
 
 **Purpose:** This repository is the starter *template* for student project repositories. In GitHub Classroom we will use this template so each group gets a well-organized repo with instructions, a design doc, a src folder, etc.
 
+#Careerlytics
+
 --HOW TO RUN
 
 1. cd project-setup-g12-ios-update
@@ -24,7 +26,7 @@
 ---
  
 ## Team information
-- Team name: 
+- Team name: ios-update
 - Team members: Mahibah, Harishan, Harsh, Syed, Kajaanan, Jiya, Duaa, Zafina
 - GitHub Usernames:
   - 
