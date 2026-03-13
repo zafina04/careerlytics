@@ -1,5 +1,7 @@
 # Application Name: Careerlytics
 
+Welcome to Careerlytics!
+
 --HOW TO RUN
 
 1. cd project-setup-g12-ios-update
