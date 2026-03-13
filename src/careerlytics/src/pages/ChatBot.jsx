@@ -241,7 +241,7 @@ export default function ChatBot() {
   const [messages, setMessages] = useState([
     {
       role: "bot",
-      text: "Welcome to the Careerlytics Labor Intelligence System.\n\nI'm built on Statistics Canada's Labour Force Survey (LFS), Table 14-10-0416-01, covering NOC occupational data from 1987–2025. You can ask me about any of Canada's major occupational categories - how employment shifted over decades, what drove growth or decline, how provinces differed, and how major economic events reshaped the labor market.\n\nWhat would you like to explore?",
+      text: "Welcome to the Careerlytics Labor Intelligence System.\n\nI'm built on Statistics Canada's Labour Force Survey (LFS), Table 14-10-0416-01, covering NOC occupational data from 1987–2025. You can ask me about any of Canada's major occupational categories, employment shifted over decades, what drove growth or decline, how provinces differed, and how major economic events reshaped the labor market.\n\nWhat would you like to explore?",
       nocCategory: null
     }
   ]);
@@ -300,10 +300,7 @@ export default function ChatBot() {
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#50e3a4", boxShadow: "0 0 6px #50e3a4" }} />
-            <span style={{ fontSize: "0.68rem", color: "#50e3a4", fontFamily: "'DM Mono',monospace", letterSpacing: ".08em" }}>ACTIVE</span>
-          </div>
+          
         </div>
 
         {/* Messages */}
