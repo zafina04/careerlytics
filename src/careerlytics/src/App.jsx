@@ -31,11 +31,11 @@ function Navbar() {
       </NavLink>
       <ul className="nav-links">
         <li><NavLink to="/"             end>Home</NavLink></li>
-        <li><NavLink to="/dashboard"       >Job Dashboard</NavLink></li>
-        <li><NavLink to="/insight"       >Historical Insight</NavLink></li>
+        <li><NavLink to="/dashboard"       >View Occupation Data</NavLink></li>
+        <li><NavLink to="/insight"       >Historical Map Data</NavLink></li>
         <li><NavLink to="/chatbot"         >Historical Chatbot</NavLink></li>
-        <li><NavLink to="/compare"         >Compare Career</NavLink></li>
-        <li><NavLink to="/about"           >About Us</NavLink></li>
+        <li><NavLink to="/compare"         >Compare Occupation Data</NavLink></li>
+        <li><NavLink to="/about"           >About Us/FAQ</NavLink></li>
       </ul>
     </nav>
   )

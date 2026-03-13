@@ -1,10 +1,13 @@
+//About: This page is for our Find Occupation tab
+
 import { useState } from 'react'
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, LineChart, Line, Legend
-} from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
+
+
+//Storing occupations in a constant array 
 
 export const OCCUPATIONS = [
+
   'Management Occupations',
   'Business, Finance and Administration Occupations',
   'Natural and Applied Sciences and Related Occupations',
@@ -16,94 +19,144 @@ export const OCCUPATIONS = [
   'Natural Resources, Agriculture and Related Production Occupations',
   'Occupations in Manufacturing and Utilities',
   'Unclassified Occupations',
+
 ];
 
 const PROVINCES = [
-  "All", "Ontario", "Quebec", "British Columbia", "Alberta",
-  "Manitoba", "Saskatchewan", "Nova Scotia", "New Brunswick",
-  "Newfoundland and Labrador", "Prince Edward Island",
+
+  	"All", "Ontario", "Quebec", "British Columbia", "Alberta",
+  	"Manitoba", "Saskatchewan", "Nova Scotia", "New Brunswick",
+  	"Newfoundland and Labrador", "Prince Edward Island",
+
 ];
 
 function seedRand(seed) {
-  let s = seed;
-  return () => { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
+
+  	let s = seed;
+
+  	return () => { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
+
 }
 
 const PROVINCE_SCALE = {
-  "All": 1.0, "Ontario": 0.38, "Quebec": 0.23, "British Columbia": 0.14,
-  "Alberta": 0.12, "Manitoba": 0.04, "Saskatchewan": 0.03,
-  "Nova Scotia": 0.03, "New Brunswick": 0.02,
-  "Newfoundland and Labrador": 0.015, "Prince Edward Island": 0.004,
+
+
+  	"All": 1.0, "Ontario": 0.38, "Quebec": 0.23, "British Columbia": 0.14,
+  	"Alberta": 0.12, "Manitoba": 0.04, "Saskatchewan": 0.03,
+  	"Nova Scotia": 0.03, "New Brunswick": 0.02,
+  	"Newfoundland and Labrador": 0.015, "Prince Edward Island": 0.004,
+
 };
 
 const PT_SHARE = {
-  'Sales and Service Occupations': 0.42,
-  'Occupations in Art, Culture, Recreation and Sport': 0.38,
-  'Occupations in Education, Law and Social, Community and Government Services': 0.28,
-  'Health Occupations, except management': 0.25,
-  'Unclassified Occupations': 0.35,
-  'Natural Resources, Agriculture and Related Production Occupations': 0.18,
-  'Occupations in Manufacturing and Utilities': 0.15,
-  'Trades, Transport and Equipment Operators and Related Occupations': 0.14,
-  'Business, Finance and Administration Occupations': 0.22,
-  'Natural and Applied Sciences and Related Occupations': 0.12,
-  'Management Occupations': 0.08,
+
+  	'Sales and Service Occupations': 0.42,
+  	'Occupations in Art, Culture, Recreation and Sport': 0.38,
+  	'Occupations in Education, Law and Social, Community and Government Services': 0.28,
+  	'Health Occupations, except management': 0.25,
+  	'Unclassified Occupations': 0.35,
+  	'Natural Resources, Agriculture and Related Production Occupations': 0.18,
+  	'Occupations in Manufacturing and Utilities': 0.15,	
+  	'Trades, Transport and Equipment Operators and Related Occupations': 0.14,
+  	'Business, Finance and Administration Occupations': 0.22,
+  	'Natural and Applied Sciences and Related Occupations': 0.12,
+  	'Management Occupations': 0.08,
+
 };
 
+
+
 function buildSeries(occ, province, empType, yearStart, yearEnd) {
-  const combined = occ + "|" + province;
-  const hash  = combined.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-  const rand  = seedRand(hash);
-  const provScale = PROVINCE_SCALE[province] ?? 1.0;
-  const ptShare   = PT_SHARE[occ] ?? 0.2;
-  const empScale  = empType === "Part Time" ? ptShare
+	
+  	const combined = occ + "|" + province;
+
+  	const hash  = combined.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+
+  	const rand  = seedRand(hash);
+
+  	const provScale = PROVINCE_SCALE[province] ?? 1.0;
+
+  	const ptShare   = PT_SHARE[occ] ?? 0.2;
+
+  	const empScale  = empType === "Part Time" ? ptShare
                   : empType === "Full Time" ? (1 - ptShare)
                   : 1.0;
-  const scale = provScale * empScale;
-  const base  = ((hash % 400) + 80) * scale;
-  const trend = (rand() - 0.45) * 3 * scale;
-  const years = [];
+
+  	const scale = provScale * empScale;
+
+  	const base  = ((hash % 400) + 80) * scale;
+
+  	const trend = (rand() - 0.45) * 3 * scale;
+
+  	const years = [];
+
   for (let y = yearStart; y <= yearEnd; y += 4) years.push(y);
+
   return years.map((year, i) => ({
     year,
     workers: Math.max(1, Math.round(base + trend * i + (rand() - 0.5) * 20 * scale)),
   }));
+
+
 }
 
-function buildAllSeries(province, empType, yearStart, yearEnd) {
-  const result = {};
-  OCCUPATIONS.forEach(o => {
-    result[o] = buildSeries(o, province, empType, yearStart, yearEnd);
-  });
-  return result;
+
+
+function buildAllSeries(province, empType, yearStart, yearEnd){
+
+	const result = {};
+
+  	OCCUPATIONS.forEach(o => {
+    	result[o] = buildSeries(o, province, empType, yearStart, yearEnd);
+  	});
+
+  	return result;
+
+
 }
 
-function buildShareData(allSeries, yearStart, yearEnd) {
-  const years = [];
-  for (let y = yearStart; y <= yearEnd; y += 4) years.push(y);
-  return years.map((year, i) => {
-    const row = { year };
-    let total = 0;
-    OCCUPATIONS.forEach(o => { total += allSeries[o][i]?.workers ?? 0; });
-    OCCUPATIONS.forEach(o => {
-      row[o] = total ? +((allSeries[o][i]?.workers ?? 0) / total * 100).toFixed(1) : 0;
+  
+function buildShareData(allSeries, yearStart, yearEnd){
+
+
+	const years = [];
+
+  	for (let y = yearStart; y <= yearEnd; y += 4) years.push(y);
+
+  	return years.map((year, i) => {
+
+    	const row = { year };
+    	let total = 0;
+    	OCCUPATIONS.forEach(o => { total += allSeries[o][i]?.workers ?? 0; });
+    	OCCUPATIONS.forEach(o => {
+      	row[o] = total ? +((allSeries[o][i]?.workers ?? 0) / total * 100).toFixed(1) : 0;
+
     });
+
     return row;
-  });
+  	});
+
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+
+// ── components ────--
 
 function SidePanel({ children }) {
-  return <div style={styles.sidePanel}>{children}</div>;
+
+  	return <div style={styles.sidePanel}>{children}</div>;
+
 }
 
 function FilterLabel({ children }) {
-  return <div style={styles.filterLabel}>{children}</div>;
+
+  	return <div style={styles.filterLabel}>{children}</div>;
+
 }
 
 function OccupationList({ selected, onToggle, max = 1 }) {
+
   return (
+	
     <div>
       <FilterLabel>Occupation — Select One</FilterLabel>
       <div style={styles.occListBox}>
@@ -139,6 +192,7 @@ function OccupationList({ selected, onToggle, max = 1 }) {
 }
 
 function ProvinceSelect({ value, onChange }) {
+
   return (
     <div>
       <FilterLabel>Province</FilterLabel>
@@ -147,16 +201,19 @@ function ProvinceSelect({ value, onChange }) {
       </select>
     </div>
   );
+
 }
 
+
 function EmploymentType({ value, onChange }) {
-  const options = ["All", "Full Time", "Part Time"];
-  return (
-    <div>
-      <FilterLabel>Employment Type</FilterLabel>
-      <div style={styles.empToggleRow}>
-        {options.map(o => (
-          <button key={o} onClick={() => onChange(o)} style={{
+
+  	const options = ["All", "Full Time", "Part Time"];
+  	return (
+    	<div>
+      	<FilterLabel>Employment Type</FilterLabel>
+      	<div style={styles.empToggleRow}>
+        	{options.map(o => (
+          	<button key={o} onClick={() => onChange(o)} style={{
             ...styles.empToggleBtn,
             background: value === o ? "rgba(201,168,76,.15)" : "transparent",
             color:      value === o ? "#e8c97a" : "#4a4f6a",
@@ -170,22 +227,24 @@ function EmploymentType({ value, onChange }) {
   );
 }
 
+
 function YearRange({ value, onChange }) {
-  const MIN = 1987;
-  const MAX = 2025;
 
-  const pctStart = ((value[0] - MIN) / (MAX - MIN)) * 100;
-  const pctEnd   = ((value[1] - MIN) / (MAX - MIN)) * 100;
+  	const MIN = 1987;
+  	const MAX = 2025;
 
-  const handleStart = e => {
-    const v = Math.min(Number(e.target.value), value[1] - 1);
-    onChange([v, value[1]]);
-  };
+  	const pctStart = ((value[0] - MIN) / (MAX - MIN)) * 100;
+  	const pctEnd   = ((value[1] - MIN) / (MAX - MIN)) * 100;
 
-  const handleEnd = e => {
-    const v = Math.max(Number(e.target.value), value[0] + 1);
-    onChange([value[0], v]);
-  };
+	const handleStart = e => {
+		const v = Math.min(Number(e.target.value), value[1] - 1);
+		onChange([v, value[1]]);
+	};
+
+	const handleEnd = e => {
+		const v = Math.max(Number(e.target.value), value[0] + 1);
+		onChange([value[0], v]);
+	};
 
   return (
     <div>
@@ -286,48 +345,54 @@ function InsightCard({ label, value, delta, tooltip }) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function FindOccupation() {
-  const [selected,  setSelected]  = useState([]);
-  const [province,  setProvince]  = useState("All");
-  const [yearRange, setYearRange] = useState([1987, 2025]);
-  const [empType,   setEmpType]   = useState("All");
-  const [applied,   setApplied]   = useState(null);
-  const [activeTab, setActiveTab] = useState("trend");
 
-  const toggleOcc = o =>
-    setSelected(prev => prev.includes(o) ? prev.filter(x => x !== o) : [...prev, o]);
+	const [selected,  setSelected]  = useState([]);
+	const [province,  setProvince]  = useState("All");
+	const [yearRange, setYearRange] = useState([1987, 2025]);
+	const [empType,   setEmpType]   = useState("All");
+	const [applied,   setApplied]   = useState(null);
+	const [activeTab, setActiveTab] = useState("trend");
 
-  const apply = () => {
-    if (selected.length) setApplied({ occ: selected[0], province, yearRange, empType });
-  };
+  	const toggleOcc = o =>
+    	setSelected(prev => prev.includes(o) ? prev.filter(x => x !== o) : [...prev, o]);
 
-  const reset = () => {
-    setSelected([]); setApplied(null); setProvince("All");
-    setYearRange([1987, 2025]); setEmpType("All");
-    setActiveTab("trend");
-  };
+  	const apply = () => {
+    	if (selected.length) setApplied({ occ: selected[0], province, yearRange, empType });
+  	};
 
-  const allSeries  = applied ? buildAllSeries(applied.province, applied.empType, applied.yearRange[0], applied.yearRange[1]) : {};
-  const chartData  = applied ? allSeries[applied.occ] : [];
-  const shareData  = applied ? buildShareData(allSeries, applied.yearRange[0], applied.yearRange[1]) : [];
+	const reset = () => {
+		setSelected([]); setApplied(null); setProvince("All");
+		setYearRange([1987, 2025]); setEmpType("All");
+		setActiveTab("trend");
+	};
 
-  const peak  = chartData.length ? Math.max(...chartData.map(d => d.workers)) : 0;
-  const last  = chartData.length ? chartData[chartData.length - 1].workers    : 0;
-  const first = chartData.length ? chartData[0].workers                       : 0;
-  const delta = first ? Math.round(((last - first) / first) * 100)            : 0;
+	const allSeries  = applied ? buildAllSeries(applied.province, applied.empType, applied.yearRange[0], applied.yearRange[1]) : {};
+	const chartData  = applied ? allSeries[applied.occ] : [];
+	const shareData  = applied ? buildShareData(allSeries, applied.yearRange[0], applied.yearRange[1]) : [];
 
-  const shareStart = shareData.length ? shareData[0][applied?.occ]                    : 0;
-  const shareEnd   = shareData.length ? shareData[shareData.length - 1][applied?.occ] : 0;
-  const shareDelta = shareStart ? +((shareEnd - shareStart).toFixed(1))               : 0;
+	const peak  = chartData.length ? Math.max(...chartData.map(d => d.workers)) : 0;
+	const last  = chartData.length ? chartData[chartData.length - 1].workers    : 0;
+	const first = chartData.length ? chartData[0].workers                       : 0;
+	const delta = first ? Math.round(((last - first) / first) * 100)            : 0;
 
-  const TABS = [
-    { id: "trend", label: "Trend" },
-    { id: "share", label: "Workforce Share" },
-  ];
+	const shareStart = shareData.length ? shareData[0][applied?.occ]                    : 0;
+	const shareEnd   = shareData.length ? shareData[shareData.length - 1][applied?.occ] : 0;
+	const shareDelta = shareStart ? +((shareEnd - shareStart).toFixed(1))               : 0;
 
-  const OCC_COLORS = [
-    "#c9a84c","#50e3a4","#7eb8f7","#ff6b6b","#b98cff",
-    "#f0a050","#4ad8c7","#f77eb8","#a0d070","#f0e070","#90a8b0",
-  ];
+
+	const TABS = [
+
+		{ id: "trend", label: "Trend" },
+		{ id: "share", label: "Workforce Share" },
+
+	];
+
+	const OCC_COLORS = [
+
+		"#c9a84c","#50e3a4","#7eb8f7","#ff6b6b","#b98cff",
+		"#f0a050","#4ad8c7","#f77eb8","#a0d070","#f0e070","#90a8b0",
+
+	];
 
   return (
     <div style={styles.page}>
@@ -484,8 +549,10 @@ export default function FindOccupation() {
   );
 }
 
-// ─── STYLES ──────────────────────────────────────────────────────────────────
 
+
+// ─── STYLES ─────────────────
+//keeping all the css seperate, so 
 const styles = {
   page:        { display: "flex", minHeight: "100vh", overflow: "hidden" },
 

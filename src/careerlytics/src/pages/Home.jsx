@@ -1,52 +1,45 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-// ── Staggered mount animation ─────────────────────────────────────────────────
-function useFadeUp(delay = 0) {
-  const ref = useRef(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    el.style.opacity = '0'
-    el.style.transform = 'translateY(22px)'
-    const t = setTimeout(() => {
-      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease'
-      el.style.opacity = '1'
-      el.style.transform = 'translateY(0)'
-    }, delay)
-    return () => clearTimeout(t)
-  }, [delay])
-  return ref
-}
-
 // ── Nav pages ─────────────────────────────────────────────────────────────────
 const NAV_PAGES = [
-  { route: '/dashboard', icon: '', label: 'Find Occupations',  desc: 'Live postings across Canada',         color: '#2563eb', light: '#eff6ff' },
-  { route: '/chatbot',   icon: '', label: 'Historical Chatbot', desc: 'Trends & growth over time',           color: '#0284c7', light: '#e0f2fe' },
-  { route: '/compare',   icon: '',  label: 'Compare Career', desc: 'Side-by-side career analysis',       color: '#059669', light: '#ecfdf5' },
-  { route: '/about',     icon: '', label: 'About Us',       desc: 'Our data, team & mission',            color: '#7c3aed', light: '#f5f3ff' },
+  
+  {route: '/dashboard', icon: '', label: 'View Occupation Data',  desc: 'Live postings across Canada', color: '#2563eb', light: '#eff6ff' },
+  {route: '/chatbot',   icon: '', label: 'Historical Map Data', desc: 'Trends & growth over time', color: '#0284c7', light: '#e0f2fe' },
+  {route: '/compare',   icon: '',  label: 'Compare Occupation Data', desc: 'Side-by-side career analysis', color: '#059669', light: '#ecfdf5' },
+  {route: '/about',     icon: '', label: 'About Us/FAQ',       desc: 'Our data, team & mission', color: '#7c3aed', light: '#f5f3ff' },
+
 ]
 
-// ── Hover card ────────────────────────────────────────────────────────────────
+// ── Hover card ───────────────────────────────────
 function NavCard({ page, delay, navigate }) {
-    const ref = useFadeUp(delay)
+
+    //const ref = useFadeUp(delay)
     const [hovered, setHovered] = useState(false)
   
     return (
+      
       <div
-        ref={ref}
+ 
         onClick={() => navigate(page.route)}
+
         onMouseEnter={() => setHovered(true)}
+
         onMouseLeave={() => setHovered(false)}
+
         style={{
           ...s.card,
           background: hovered ? 'rgba(201,168,76,0.07)' : '#0d0e1a',
           borderColor: hovered ? 'rgba(201,168,76,0.35)' : '#1e2035',
           transform: hovered ? 'translateY(-4px) scale(1.01)' : 'translateY(0) scale(1)',
           boxShadow: hovered ? '0 16px 36px rgba(201,168,76,0.12)' : '0 2px 8px rgba(0,0,0,0.2)',
+
         }}
+
       >
-        <div style={{ flex: 1 }}>
+
+      <div style={{ flex: 1 }}>
+
           <div style={s.cardIconEmoji}>{page.icon}</div>
           <div style={{ ...s.cardLabel, color: hovered ? '#e8c97a' : '#c9a84c' }}>
             {page.label}
@@ -60,22 +53,21 @@ function NavCard({ page, delay, navigate }) {
           color: hovered ? 'rgba(201,168,76,0.9)' : '#2e3050',
           transform: hovered ? 'translate(2px,-2px)' : 'none',
         }}>
-          ↗
+          
         </div>
       </div>
     )
-  }
+
+}
 
 // ── Main Home ─────────────────────────────────────────────────────────────────
 export default function Home() {
+
     const navigate = useNavigate()
-  
-    const tagRef = useFadeUp(100)
-    const h1Ref  = useFadeUp(220)
-    const subRef = useFadeUp(340)
-    const btnRef = useFadeUp(440)
-  
+
+
     const [primaryHover, setPrimaryHover] = useState(false)
+
     const [secondHover,  setSecondHover]  = useState(false)
   
     return (
@@ -93,35 +85,36 @@ export default function Home() {
           {/* LEFT — Hero copy */}
           <div style={s.left}>
   
-            
-  
-            <h1 ref={h1Ref} style={s.h1}>
+            <h1 style={s.h1}>
               Welcome to<br />
               <span style={s.h1Accent}>Careerlytics</span>
             </h1>
   
-            <p ref={subRef} style={s.sub}>
+            <p style={s.sub}>
               Explore historical occupation trends across every Canadian province.
               See how industries rose, shifted, and evolved over nearly four decades from 1987 to 2025.
             </p>
   
-            <div ref={btnRef} style={s.btnRow}>
+            <div style={s.btnRow}>
+
               <button
                 style={{ ...s.btnPrimary, ...(primaryHover ? s.btnPrimaryHover : {}) }}
                 onMouseEnter={() => setPrimaryHover(true)}
                 onMouseLeave={() => setPrimaryHover(false)}
                 onClick={() => navigate('/chatbot')}
               >
-                Explore Trends →
+                Explore Trends 
               </button>
+
               <button
                 style={{ ...s.btnOutline, ...(secondHover ? s.btnOutlineHover : {}) }}
                 onMouseEnter={() => setSecondHover(true)}
                 onMouseLeave={() => setSecondHover(false)}
                 onClick={() => navigate('/compare')}
               >
-                Compare Careers
+                Compare Occupation
               </button>
+
             </div>
   
           </div>
@@ -168,7 +161,6 @@ const s = {
         
         position: 'absolute',
         width: 700, height: 700, borderRadius: '50%',
-        //background: `radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 40%)`,
         top: -200, left: -200, pointerEvents: 'none',
     },
     bgOrb2: {
@@ -286,13 +278,7 @@ const s = {
     
     // Right column — card grid
     right: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
-      cardGrid: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '0.85rem',
-        width: '100%',
-    },
-    
+      
     // Individual card
     card: {
         display: 'flex',
