@@ -35,7 +35,7 @@ body {
   align-items: center;
   height: 60px;
   padding: 0 2.5rem;
-  background: rgba(8, 8, 16, 0.92);
+
   backdrop-filter: blur(12px);
   border-bottom: 1px solid #1e2035;
 }
