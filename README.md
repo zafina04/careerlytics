@@ -2,7 +2,7 @@
 
 **Purpose:** This repository is the starter *template* for student project repositories. In GitHub Classroom we will use this template so each group gets a well-organized repo with instructions, a design doc, a src folder, etc.
 
-# Careerlytics
+# Application Name: Careerlytics
 
 --HOW TO RUN
 
