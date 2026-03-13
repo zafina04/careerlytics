@@ -4,13 +4,13 @@
 
 --HOW TO RUN
 
-cd project-setup-g12-ios-update
-cd src
-cd careerlytics
-cd src
-npm install
-npm install recharts
-npm run dev
+1. cd project-setup-g12-ios-update
+2. cd src
+3. cd careerlytics
+4. cd src
+5. npm install
+6. npm install recharts
+7. npm run dev
 
 ---
 
