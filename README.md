@@ -35,3 +35,7 @@ Welcome to Careerlytics!
 - Share your board with the 3750 email (cis3750@socs.uoguelph.ca).
 
 Trello: https://trello.com/b/KrqY3Dfe/ios-update
+
+
+<img width="1438" height="814" alt="Screenshot 2026-03-13 at 2 38 33 PM" src="https://github.com/user-attachments/assets/0da3dd37-9b1d-4ab4-a071-99ce22fd2044" />
+
