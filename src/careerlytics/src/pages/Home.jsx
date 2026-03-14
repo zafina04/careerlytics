@@ -11,6 +11,7 @@ const NAV_PAGES = [
 
 ]
 
+
 // ── Hover card ───────────────────────────────────
 function NavCard({ page, delay, navigate }) {
 

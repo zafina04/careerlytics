@@ -30,6 +30,8 @@ const PROVINCES = [
 
 ];
 
+
+//This is as a placeholder to generate consistent random data for each occupation-province combination, based on a seeded hash of their names. This way the charts will look different for each selection but remain stable across interactions.
 function seedRand(seed) {
 
   	let s = seed;
@@ -156,7 +158,7 @@ function FilterLabel({ children }) {
 function OccupationList({ selected, onToggle, max = 1 }) {
 
   return (
-	
+
     <div>
       <FilterLabel>Occupation — Select One</FilterLabel>
       <div style={styles.occListBox}>
@@ -191,6 +193,8 @@ function OccupationList({ selected, onToggle, max = 1 }) {
   );
 }
 
+
+//function for selecting province, with a dropdown menu and label
 function ProvinceSelect({ value, onChange }) {
 
   return (
@@ -205,6 +209,7 @@ function ProvinceSelect({ value, onChange }) {
 }
 
 
+//function for selecting the employment type
 function EmploymentType({ value, onChange }) {
 
   	const options = ["All", "Full Time", "Part Time"];
@@ -227,7 +232,7 @@ function EmploymentType({ value, onChange }) {
   );
 }
 
-
+//function to select tyear range, with a slider and labels
 function YearRange({ value, onChange }) {
 
   	const MIN = 1987;
