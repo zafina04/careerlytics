@@ -1,5 +1,6 @@
 //About: This page is for our Find Occupation tab
 
+import { color } from 'd3';
 import { useState } from 'react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
 
@@ -157,15 +158,22 @@ function FilterLabel({ children }) {
 
 function OccupationList({ selected, onToggle, max = 1 }) {
 
+
   return (
 
     <div>
+
       <FilterLabel>Occupation — Select One</FilterLabel>
+
       <div style={styles.occListBox}>
+
         {OCCUPATIONS.map(o => {
+
           const isSelected = selected.includes(o);
           const isDisabled = !isSelected && selected.length >= max;
+
           return (
+			
             <label key={o} style={{
               ...styles.occItem,
               cursor:     isDisabled ? "not-allowed" : "pointer",
@@ -182,16 +190,22 @@ function OccupationList({ selected, onToggle, max = 1 }) {
               <input type="checkbox" checked={isSelected}
                 onChange={() => !isDisabled && onToggle(o)}
                 style={{ display: "none" }} />
-              <span style={{ ...styles.occLabel, color: isSelected ? "#e8c97a" : "#8a8fa8" }}>
+              <span style={{ ...styles.occLabel, color: isSelected ? "#222222" : "#000000" }}>
                 {o}
               </span>
             </label>
+
           );
+
         })}
+
       </div>
+
     </div>
-  );
-}
+
+  ); //End of return
+
+} //end of OccupationList function
 
 
 //function for selecting province, with a dropdown menu and label
@@ -269,6 +283,7 @@ function YearRange({ value, onChange }) {
           height:3, borderRadius:2, background:"#1e2035",
           transform:"translateY(-50%)", pointerEvents:"none",
         }} />
+
         {/* Active fill */}
         <div style={{
           position:"absolute", top:"50%",
@@ -400,87 +415,195 @@ export default function FindOccupation() {
 	];
 
   return (
+
     <div style={styles.page}>
-      <SidePanel>
-        <OccupationList selected={selected} onToggle={toggleOcc} max={1} />
-        <ProvinceSelect value={province} onChange={setProvince} />
-        <EmploymentType value={empType} onChange={setEmpType} />
-        <YearRange value={yearRange} onChange={setYearRange} />
-        <div style={styles.sideFooter}>
-          <ActionBtn onClick={reset} variant="secondary">Reset</ActionBtn>
-          <ActionBtn onClick={apply}>Apply</ActionBtn>
-        </div>
+	    
+		
+		
+      	<SidePanel>
+
+        	<OccupationList selected={selected} onToggle={toggleOcc} max={1} />
+        	<ProvinceSelect value={province} onChange={setProvince} />
+        	<EmploymentType value={empType} onChange={setEmpType} />
+        	<YearRange value={yearRange} onChange={setYearRange} />
+
+        	<div style={styles.sideFooter}>
+
+          		<ActionBtn onClick={reset} variant="secondary">Reset</ActionBtn>
+          		<ActionBtn onClick={apply}>Apply</ActionBtn>
+
+        	</div>
+
       </SidePanel>
 
+	  
       <div style={styles.mainPanel}>
+
+
+		{/*First is to show the empty state, before submit is clicked */}
+		{!applied && (
+
+			<div style = {styles.emptyState}> 
+
+				<div style = {styles.emptyTitle}> Select Filters to View Occupation Trends </div>
+
+
+				<div style = {styles.emptySubtitle}> Choose an occupation, set province, apply </div>
+			
+			</div>
+
+		)}
+
+
+		{/*Then, we show the results, when filters are applied and submit is clicked*/}
+		{applied && (
+
+			<div style = {styles.resultGraph}> 
+
+				{/*This div is for the subtitles */}
+				<div>
+              		<div style={styles.sectionTag}>
+						
+						OCCUPATION ANALYSIS
+						
+					</div>
+
+              		<h2 style={styles.resultTitle}>{applied.occ}</h2>
+
+              		<div style={styles.resultSubtitle}>
+
+						{/*this shows the time range selected by the user, and province */}
+                		{applied.province} {applied.yearRange[0]} – {applied.yearRange[1]} {applied.empType} 
+
+              		</div>
+
+            	</div>
+
+				{/*This is for the three cards*/}
+				<div style={styles.insightGrid}>
+					
+
+					<InsightCard label="Peak Employment" value={peak.toLocaleString() + "k"}
+						
+						tooltip="The highest worker count recorded for this occupation within the selected year range and province." 
+						
+					/>
+
+					<InsightCard label="FINAL COUNT" value={last.toLocaleString() + "k"} delta={delta}
+
+						tooltip="Total workers in this occupation at the end of the selected period. The % change shows growth or decline relative to the starting year." 
+					
+					/>
+
+					<InsightCard label="WORKFORCE SHARE" value={shareEnd + "%"} delta={+shareDelta}
+
+						tooltip="This occupation's share of the total provincial workforce at the end of the period. A falling share means this sector grew slower than the overall workforce — even if absolute numbers rose." 
+						
+					/>
+
+            	</div>
+
+				{/*This is for the tabs to switch between the trend chart and the share chart */}
+				<div style = {styles.tabBar}>
+
+              		{TABS.map(t => (
+
+
+                		<button key={t.id} onClick={() => setActiveTab(t.id)} style={{
+
+                  			...styles.tabBtn,
+                  			color:        activeTab === t.id ? "#e8c97a" : "#4a4f6a",
+                  			borderBottom: activeTab === t.id ? "2px solid #c9a84c" : "2px solid transparent",
+
+                		}}>
+
+                  			{t.label}
+							
+                		</button>
+             		))}
+
+            	</div>
+
+
+
+				{/*This is for the occupation trends chart over the specfic time*/}
+				{activeTab === "trend" && (
+
+              		<div style={styles.card}>
+
+						<div style = {styles.cardLabel}> Total People Overtime (<h2 style={styles.resultTitleGraph}>{applied.occ}</h2>)</div>
+
+						<ResponsiveContainer width="100%" height={260}>
+							
+							<AreaChart data={chartData}>
+
+							
+								<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
+
+								<XAxis 
+									
+									dataKey="year" 
+									stroke="#4a4f6a" 
+									tick={styles.chartTick} 
+									label={{ value: "Year", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "11px"}}
+					
+								/>
+
+								<YAxis stroke="#4a4f6a" tick={styles.chartTick}
+
+									label = {{value: "Workers (Thousands)", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "11px", offset: 10}}
+
+									tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} 
+
+								/>
+
+								<Tooltip contentStyle={styles.tooltipBox} />
+
+								<Area type="monotone" dataKey="workers"
+
+									stroke="#c9a84c" strokeWidth={2}
+									fill="url(#areaGrad)" dot={{ fill: "#c9a84c", r: 4 }} 
+								
+								/>
+
+							</AreaChart>
+
+						</ResponsiveContainer>
+
+						<div style={{ ...styles.mlText, marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
+						<span style={styles.cardLabel}>ML INSIGHT — TREND CLASSIFICATION &nbsp;</span>
+						{delta < -30
+							? `K-Means clustering places ${applied.occ} in the Technological Displacement cluster, rapid decline following mechanisation or infrastructure change.`
+							: delta > 20
+							? `Trend detection classifies ${applied.occ} as Sustained Growth, driven by urbanisation, policy shifts, or industrial expansion.`
+							: `${applied.occ} is Cyclically Stable, fluctuating with economic cycles but maintaining structural presence.`
+						}
+						</div>
+
+              		</div>
+
+            	)}
+
+			</div>
+
+		)}
+
+
         {!applied ? (
+
           <div style={styles.emptyState}>
-            <div style={styles.emptyTitle}>Select Filters to View Occupation Trends</div>
-            <div style={styles.emptySubtitle}>choose an occupation · set province · apply</div>
+    
           </div>
+
         ) : (
+
           <div style={styles.resultStack}>
-            <div>
-              <div style={styles.sectionTag}>OCCUPATION ANALYSIS</div>
-              <h2 style={styles.resultTitle}>{applied.occ}</h2>
-              <div style={styles.resultSubtitle}>
-                {applied.province} · {applied.yearRange[0]}–{applied.yearRange[1]} · {applied.empType}
-              </div>
-            </div>
+            
 
-            <div style={styles.insightGrid}>
-              <InsightCard label="PEAK EMPLOYMENT" value={peak.toLocaleString() + "k"}
-                tooltip="The highest worker count recorded for this occupation within the selected year range and province." />
-              <InsightCard label="FINAL COUNT" value={last.toLocaleString() + "k"} delta={delta}
-                tooltip="Total workers in this occupation at the end of the selected period. The % change shows growth or decline relative to the starting year." />
-              <InsightCard label="WORKFORCE SHARE" value={shareEnd + "%"} delta={+shareDelta}
-                tooltip="This occupation's share of the total provincial workforce at the end of the period. A falling share means this sector grew slower than the overall workforce — even if absolute numbers rose." />
-            </div>
+            
 
-            <div style={styles.tabBar}>
-              {TABS.map(t => (
-                <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-                  ...styles.tabBtn,
-                  color:        activeTab === t.id ? "#e8c97a" : "#4a4f6a",
-                  borderBottom: activeTab === t.id ? "2px solid #c9a84c" : "2px solid transparent",
-                }}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
+            
 
-            {activeTab === "trend" && (
-              <div style={styles.card}>
-                <div style={styles.cardLabel}>WORKFORCE OVER TIME </div>
-                <ResponsiveContainer width="100%" height={260}>
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#c9a84c" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#c9a84c" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
-                    <XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick} />
-                    <YAxis stroke="#4a4f6a" tick={styles.chartTick}
-                      tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} />
-                    <Tooltip contentStyle={styles.tooltipBox} />
-                    <Area type="monotone" dataKey="workers"
-                      stroke="#c9a84c" strokeWidth={2}
-                      fill="url(#areaGrad)" dot={{ fill: "#c9a84c", r: 4 }} />
-                  </AreaChart>
-                </ResponsiveContainer>
-                <div style={{ ...styles.mlText, marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
-                  <span style={styles.cardLabel}>ML INSIGHT — TREND CLASSIFICATION &nbsp;</span>
-                  {delta < -30
-                    ? `K-Means clustering places ${applied.occ} in the Technological Displacement cluster, rapid decline following mechanisation or infrastructure change.`
-                    : delta > 20
-                    ? `Trend detection classifies ${applied.occ} as Sustained Growth, driven by urbanisation, policy shifts, or industrial expansion.`
-                    : `${applied.occ} is Cyclically Stable, fluctuating with economic cycles but maintaining structural presence.`
-                  }
-                </div>
-              </div>
-            )}
 
             {activeTab === "share" && (
               <div style={styles.card}>
@@ -549,10 +672,15 @@ export default function FindOccupation() {
             )}
           </div>
         )}
+
       </div>
+
     </div>
+
   );
-}
+
+
+} //end of FindOccupation component
 
 
 
@@ -563,7 +691,7 @@ const styles = {
 
   sidePanel: {
     width: 280, minWidth: 280,
-    background: "#0d0e1a", borderRight: "1px solid #1e2035",
+    background: "#FAF3E1", borderRight: "1px solid #1e2035",
     padding: "1.5rem 1.25rem",
     display: "flex", flexDirection: "column", gap: "1.25rem",
     overflowY: "auto",
@@ -576,14 +704,14 @@ const styles = {
   },
 
   occListBox: {
-    background: "#0a0a0f", border: "1px solid #1e2035",
+    background: "#F5E7C6", border: "1px solid #1e2035",
     borderRadius: 8, maxHeight: 220, overflowY: "auto", padding: "0.25rem",
   },
   occItem: {
     display: "flex", alignItems: "center", gap: 10,
     padding: "6px 8px", borderRadius: 6, transition: "background .15s",
   },
-  occLabel:    { fontSize: "0.82rem", fontFamily: "'DM Sans',sans-serif" },
+  occLabel:    { fontSize: "0.82rem", fontFamily: "'DM Sans',sans-serif"},
   checkbox: {
     width: 14, height: 14, borderRadius: 3, flexShrink: 0,
     display: "flex", alignItems: "center", justifyContent: "center",
@@ -617,7 +745,8 @@ const styles = {
     fontWeight: 600, letterSpacing: ".03em", transition: "all .2s",
   },
 
-  mainPanel:   { flex: 1, padding: "2rem", overflowY: "auto", background: "#080810" },
+  //background: "#080810" 
+  mainPanel:   { flex: 1, padding: "2rem", overflowY: "auto", background: "#FAF3E1"},
 
   emptyState: {
     display: "flex", alignItems: "center", justifyContent: "center",
@@ -630,13 +759,13 @@ const styles = {
     fontSize: "1.1rem", color: "#2e3050", fontFamily: "'DM Mono',monospace",
   },
 
-  resultStack: { display: "flex", flexDirection: "column", gap: "1.5rem" },
+  resultGraph: { display: "flex", flexDirection: "column", gap: "1.5rem" },
   sectionTag: {
     fontSize: "0.72rem", color: "#4a4f6a",
     fontFamily: "'DM Mono',monospace", letterSpacing: ".1em",
   },
   resultTitle: {
-    fontFamily: "'Playfair Display',serif", color: "#e8c97a",
+    fontFamily: "'Playfair Display',serif", color: "#222222",
     fontSize: "1.8rem", margin: "4px 0 0",
   },
   resultSubtitle: {
@@ -647,7 +776,7 @@ const styles = {
     display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1rem",
   },
   insightCard: {
-    background: "#0d0e1a", border: "1px solid #1e2035",
+    background: "#F5E7C6", border: "1px solid #1e2035",
     borderRadius: 10, padding: "1rem 1.25rem",
   },
   insightLabel: {
@@ -686,7 +815,7 @@ const styles = {
   },
 
   card: {
-    background: "#0d0e1a", border: "1px solid #1e2035",
+    background: "#F5E7C6", border: "1px solid #1e2035",
     borderRadius: 12, padding: "1.5rem",
   },
   cardLabel: {

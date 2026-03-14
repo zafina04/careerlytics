@@ -22,7 +22,7 @@
 
 body {
   font-family: 'DM Sans', sans-serif;
-  background: var(--white);
+  background: #F5E7C6;
   color: var(--text);
   overflow-x: hidden;
 }
