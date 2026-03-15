@@ -1,27 +1,29 @@
 //About: This page is for our Find Occupation tab
 
 import { color } from 'd3';
-import { useState } from 'react'
+import { useState, useRef} from 'react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
 
+import html2canvas from 'html2canvas';
+
+import rawData from "../../../Data/backend/data.json";
 
 //Storing occupations in a constant array 
+console.log("JSON keys:", Object.keys(rawData));
 
 export const OCCUPATIONS = [
-
-  'Management Occupations',
-  'Business, Finance and Administration Occupations',
-  'Natural and Applied Sciences and Related Occupations',
-  'Health Occupations, except management',
-  'Occupations in Education, Law and Social, Community and Government Services',
-  'Occupations in Art, Culture, Recreation and Sport',
-  'Sales and Service Occupations',
-  'Trades, Transport and Equipment Operators and Related Occupations',
-  'Natural Resources, Agriculture and Related Production Occupations',
-  'Occupations in Manufacturing and Utilities',
-  'Unclassified Occupations',
-
-];
+	'Management occupations',
+	'Business, finance and administration occupations, except management',
+	'Natural and applied sciences and related occupations, except management',
+	'Health occupations, except management',
+	'Occupations in education, law and social, community and government services, except management',
+	'Occupations in art, culture, recreation and sport, except management',
+	'Sales and service occupations, except management',
+	'Trades, transport and equipment operators and related occupations, except management',
+	'Natural resources, agriculture and related production occupations, except management',
+	'Occupations in manufacturing and utilities, except management',
+	'Unclassified occupations',
+  ];
 
 const PROVINCES = [
 
@@ -31,115 +33,89 @@ const PROVINCES = [
 
 ];
 
+function buildSeries(occupation, province, empType, yearStart, yearEnd){
 
-//This is as a placeholder to generate consistent random data for each occupation-province combination, based on a seeded hash of their names. This way the charts will look different for each selection but remain stable across interactions.
-function seedRand(seed) {
+	let empKey = "Employment"
 
-  	let s = seed;
+	if(empType == "Full Time") {
 
-  	return () => { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
+		empKey = "Full-time employment";
 
-}
+	}
 
-const PROVINCE_SCALE = {
+	if (empType == "Part Time") {
 
+		empKey = "Part-time employment";
+	}
 
-  	"All": 1.0, "Ontario": 0.38, "Quebec": 0.23, "British Columbia": 0.14,
-  	"Alberta": 0.12, "Manitoba": 0.04, "Saskatchewan": 0.03,
-  	"Nova Scotia": 0.03, "New Brunswick": 0.02,
-  	"Newfoundland and Labrador": 0.015, "Prince Edward Island": 0.004,
-
-};
-
-const PT_SHARE = {
-
-  	'Sales and Service Occupations': 0.42,
-  	'Occupations in Art, Culture, Recreation and Sport': 0.38,
-  	'Occupations in Education, Law and Social, Community and Government Services': 0.28,
-  	'Health Occupations, except management': 0.25,
-  	'Unclassified Occupations': 0.35,
-  	'Natural Resources, Agriculture and Related Production Occupations': 0.18,
-  	'Occupations in Manufacturing and Utilities': 0.15,	
-  	'Trades, Transport and Equipment Operators and Related Occupations': 0.14,
-  	'Business, Finance and Administration Occupations': 0.22,
-  	'Natural and Applied Sciences and Related Occupations': 0.12,
-  	'Management Occupations': 0.08,
-
-};
+	console.log("Looking up:", occupation, province, empKey);
+  console.log("Result:", rawData[occupation]?.[province]?.[empKey]);
 
 
-
-function buildSeries(occ, province, empType, yearStart, yearEnd) {
-	
-  	const combined = occ + "|" + province;
-
-  	const hash  = combined.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-
-  	const rand  = seedRand(hash);
-
-  	const provScale = PROVINCE_SCALE[province] ?? 1.0;
-
-  	const ptShare   = PT_SHARE[occ] ?? 0.2;
-
-  	const empScale  = empType === "Part Time" ? ptShare
-                  : empType === "Full Time" ? (1 - ptShare)
-                  : 1.0;
-
-  	const scale = provScale * empScale;
-
-  	const base  = ((hash % 400) + 80) * scale;
-
-  	const trend = (rand() - 0.45) * 3 * scale;
-
-  	const years = [];
-
-  for (let y = yearStart; y <= yearEnd; y += 4) years.push(y);
-
-  return years.map((year, i) => ({
-    year,
-    workers: Math.max(1, Math.round(base + trend * i + (rand() - 0.5) * 20 * scale)),
-  }));
-
+	const series = rawData[occupation]?.[province]?.[empKey] ?? [];
+  	return series.filter(d => d.year >= yearStart && d.year <= yearEnd);
 
 }
 
-
-
-function buildAllSeries(province, empType, yearStart, yearEnd){
-
+function buildAllSeries(province, empType, yearStart, yearEnd) {
 	const result = {};
-
-  	OCCUPATIONS.forEach(o => {
-    	result[o] = buildSeries(o, province, empType, yearStart, yearEnd);
-  	});
-
-  	return result;
-
-
-}
-
-  
-function buildShareData(allSeries, yearStart, yearEnd){
+	OCCUPATIONS.forEach(o => {
+	  result[o] = buildSeries(o, province, empType, yearStart, yearEnd);
+	});
+	return result;
+  }
 
 
+function buildShareData(allSeries, yearStart, yearEnd) {
+
+	// build an array of every year in the range
 	const years = [];
+	for (let y = yearStart; y <= yearEnd; y++) {
+	  years.push(y);
+	}
+  
+	// for each year, calculate each occupation's % share of total workers
+	return years.map((year, i) => {
+  
+	  const row = { year };
+  
+	  // add up total workers across all occupations for this year
+	  let total = 0;
+	  OCCUPATIONS.forEach(o => {
+		total += allSeries[o][i]?.workers ?? 0;
+	  });
+  
+	  // calculate each occupation's percentage share
+	  OCCUPATIONS.forEach(o => {
+		if (total) {
+		  row[o] = +((allSeries[o][i]?.workers ?? 0) / total * 100).toFixed(1);
+		} else {
+		  row[o] = 0;
+		}
+	  });
+  
+	  return row;
+  
+	});
 
-  	for (let y = yearStart; y <= yearEnd; y += 4) years.push(y);
 
-  	return years.map((year, i) => {
 
-    	const row = { year };
-    	let total = 0;
-    	OCCUPATIONS.forEach(o => { total += allSeries[o][i]?.workers ?? 0; });
-    	OCCUPATIONS.forEach(o => {
-      	row[o] = total ? +((allSeries[o][i]?.workers ?? 0) / total * 100).toFixed(1) : 0;
 
-    });
-
-    return row;
-  	});
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // ── components ────--
@@ -373,6 +349,18 @@ export default function FindOccupation() {
 	const [applied,   setApplied]   = useState(null);
 	const [activeTab, setActiveTab] = useState("trend");
 
+	const chartRef = useRef(null);
+
+	//function for donwlaoding the chart
+	const downloadChart = () => {
+		html2canvas(chartRef.current).then(canvas => {
+		const link = document.createElement('a');
+		link.download = `${applied.occ}-${applied.province}.png`;
+		link.href = canvas.toDataURL();
+		link.click();
+		});
+	};
+
   	const toggleOcc = o =>
     	setSelected(prev => prev.includes(o) ? prev.filter(x => x !== o) : [...prev, o]);
 
@@ -483,22 +471,36 @@ export default function FindOccupation() {
 				<div style={styles.insightGrid}>
 					
 
-					<InsightCard label="Peak Employment" value={peak.toLocaleString() + "k"}
+					<InsightCard label="Peak Employment Number" value={peak.toLocaleString() + "k"}
 						
 						tooltip="The highest worker count recorded for this occupation within the selected year range and province." 
 						
 					/>
 
-					<InsightCard label="FINAL COUNT" value={last.toLocaleString() + "k"} delta={delta}
+					<InsightCard label="Final Count" value={last.toLocaleString() + "k"} delta={delta}
 
 						tooltip="Total workers in this occupation at the end of the selected period. The % change shows growth or decline relative to the starting year." 
 					
 					/>
 
-					<InsightCard label="WORKFORCE SHARE" value={shareEnd + "%"} delta={+shareDelta}
+					<InsightCard label="Workforce Share" value={shareEnd + "%"} delta={+shareDelta}
 
 						tooltip="This occupation's share of the total provincial workforce at the end of the period. A falling share means this sector grew slower than the overall workforce — even if absolute numbers rose." 
 						
+					/>
+
+
+					<InsightCard label="Peak Year" value={shareEnd + "%"} delta={+shareDelta}
+
+					tooltip="This occupation's share of the total provincial workforce at the end of the period. A falling share means this sector grew slower than the overall workforce — even if absolute numbers rose." 
+
+					/>
+
+
+					<InsightCard label="Average Employment" value={shareEnd + "%"} delta={+shareDelta}
+
+					tooltip="This occupation's share of the total provincial workforce at the end of the period. A falling share means this sector grew slower than the overall workforce — even if absolute numbers rose." 
+
 					/>
 
             	</div>
@@ -529,7 +531,11 @@ export default function FindOccupation() {
 				{/*This is for the occupation trends chart over the specfic time*/}
 				{activeTab === "trend" && (
 
-              		<div style={styles.card}>
+					
+
+					
+              		<div style={styles.card} ref={chartRef}>
+						
 
 						<div style = {styles.cardLabel}> Total People Overtime (<h2 style={styles.resultTitleGraph}>{applied.occ}</h2>)</div>
 
@@ -568,110 +574,147 @@ export default function FindOccupation() {
 
 							</AreaChart>
 
+							
+
 						</ResponsiveContainer>
 
-						<div style={{ ...styles.mlText, marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
-						<span style={styles.cardLabel}>ML INSIGHT — TREND CLASSIFICATION &nbsp;</span>
-						{delta < -30
-							? `K-Means clustering places ${applied.occ} in the Technological Displacement cluster, rapid decline following mechanisation or infrastructure change.`
-							: delta > 20
-							? `Trend detection classifies ${applied.occ} as Sustained Growth, driven by urbanisation, policy shifts, or industrial expansion.`
-							: `${applied.occ} is Cyclically Stable, fluctuating with economic cycles but maintaining structural presence.`
-						}
-						</div>
+
+						
+
+						
 
               		</div>
 
+					
+
             	)}
+
+						
+
+
+
+
+				{/*This for the workforce share chart */}
+				{activeTab === "share" && (
+
+              		<div style={styles.card}>
+
+                		<div style={styles.cardLabel}>SHARE OF TOTAL WORKFORCE — ALL OCCUPATIONS (%)</div>
+
+                		<div style={styles.shareNote}>
+                  			Relative share corrects for population growth. A falling share means this occupation
+                  			is growing <em>slower</em> than the overall workforce, even if absolute numbers rise.
+                		</div>
+
+
+                		<ResponsiveContainer width="100%" height={300}>
+
+                  			<LineChart data={shareData}>
+
+
+								<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
+
+								<XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick} />
+								<YAxis stroke="#4a4f6a" tick={styles.chartTick} tickFormatter={v => v + "%"} />
+
+								<Tooltip
+
+									content = {({ active, payload, label }) => {
+
+										if (!active || !payload?.length) return null;
+
+										const sorted = [...payload].sort((a, b) => b.value - a.value);
+
+										return (
+
+											<div style={{
+												background: "#0d0e1a", border: "1px solid #1e2035", borderRadius: 10,
+												padding: "10px 14px", fontFamily: "'DM Mono',monospace",
+												boxShadow: "0 8px 32px rgba(0,0,0,.6)", minWidth: 260,
+											}}>
+
+												<div style={{ fontSize: "0.7rem", color: "#4a4f6a", marginBottom: 8, letterSpacing: ".08em" }}>{label}</div>
+
+												<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 20px" }}>
+
+
+													{sorted.map(p => {
+														const short = p.name.replace("Occupations in ", "").replace(" Occupations", "").replace(" and Related Occupations", "");
+														const isFocus = p.name === applied.occ;
+														return (
+														<div key={p.name} style={{ display: "flex", alignItems: "center", gap: 6, opacity: isFocus ? 1 : 0.5 }}>
+															<div style={{ width: 6, height: 6, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
+															<span style={{ fontSize: "0.65rem", color: isFocus ? "#e8c97a" : "#8a8fa8", fontWeight: isFocus ? 700 : 400, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{short}</span>
+															<span style={{ fontSize: "0.65rem", color: isFocus ? "#e8c97a" : "#6a6f88", flexShrink: 0 }}>{p.value}%</span>
+														</div>
+														);
+													})}
+
+												</div>
+											</div>
+										);
+
+									}}
+
+                    		/>
+							
+							{OCCUPATIONS.map((o, i) => (
+
+								<Line key={o} type="monotone" dataKey={o}
+									stroke={OCC_COLORS[i]}
+									strokeWidth={o === applied.occ ? 3 : 1}
+									strokeOpacity={o === applied.occ ? 1 : 0.3}
+									dot={false} />
+							))}
+
+                  			</LineChart>
+
+                		</ResponsiveContainer>
+
+						{/* Custom compact legend */}
+						<div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "5px 12px", marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
+
+							{OCCUPATIONS.map((o, i) => {
+								const short = o.replace("Occupations in ", "").replace(" Occupations", "").replace(" and Related Occupations", "");
+								const isFocus = o === applied.occ;
+								return (
+								<div key={o} style={{ display: "flex", alignItems: "center", gap: 6, opacity: isFocus ? 1 : 0.45 }}>
+									<div style={{ width: isFocus ? 14 : 8, height: 2, background: OCC_COLORS[i], flexShrink: 0, borderRadius: 1 }} />
+									<span style={{ fontSize: "0.61rem", fontFamily: "'DM Mono',monospace", color: isFocus ? "#e8c97a" : "#4a4f6a", fontWeight: isFocus ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{short}</span>
+								</div>
+								);
+							})}
+
+						</div>
+
+						
+				
+              		</div>
+
+					
+
+            	)}
+
+				<button onClick={downloadChart} style={styles.downloadBtn}>
+					Download Chart
+				</button>
+
+
+				<div style={{ ...styles.mlText, marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
+
+				<span style={styles.cardLabel}>ML INSIGHT — TREND CLASSIFICATION &nbsp;</span>
+				{delta < -30
+					? `K-Means clustering places ${applied.occ} in the Technological Displacement cluster, rapid decline following mechanisation or infrastructure change.`
+					: delta > 20
+					? `Trend detection classifies ${applied.occ} as Sustained Growth, driven by urbanisation, policy shifts, or industrial expansion.`
+					: `${applied.occ} is Cyclically Stable, fluctuating with economic cycles but maintaining structural presence.`
+				}
+				</div>	
+
 
 			</div>
 
 		)}
-
-
-        {!applied ? (
-
-          <div style={styles.emptyState}>
-    
-          </div>
-
-        ) : (
-
-          <div style={styles.resultStack}>
-            
-
-            
-
-            
-
-
-            {activeTab === "share" && (
-              <div style={styles.card}>
-                <div style={styles.cardLabel}>SHARE OF TOTAL WORKFORCE — ALL OCCUPATIONS (%)</div>
-                <div style={styles.shareNote}>
-                  Relative share corrects for population growth. A falling share means this occupation
-                  is growing <em>slower</em> than the overall workforce, even if absolute numbers rise.
-                </div>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={shareData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
-                    <XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick} />
-                    <YAxis stroke="#4a4f6a" tick={styles.chartTick} tickFormatter={v => v + "%"} />
-                    <Tooltip
-                      content={({ active, payload, label }) => {
-                        if (!active || !payload?.length) return null;
-                        const sorted = [...payload].sort((a, b) => b.value - a.value);
-                        return (
-                          <div style={{
-                            background: "#0d0e1a", border: "1px solid #1e2035", borderRadius: 10,
-                            padding: "10px 14px", fontFamily: "'DM Mono',monospace",
-                            boxShadow: "0 8px 32px rgba(0,0,0,.6)", minWidth: 260,
-                          }}>
-                            <div style={{ fontSize: "0.7rem", color: "#4a4f6a", marginBottom: 8, letterSpacing: ".08em" }}>{label}</div>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 20px" }}>
-                              {sorted.map(p => {
-                                const short = p.name.replace("Occupations in ", "").replace(" Occupations", "").replace(" and Related Occupations", "");
-                                const isFocus = p.name === applied.occ;
-                                return (
-                                  <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 6, opacity: isFocus ? 1 : 0.5 }}>
-                                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
-                                    <span style={{ fontSize: "0.65rem", color: isFocus ? "#e8c97a" : "#8a8fa8", fontWeight: isFocus ? 700 : 400, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{short}</span>
-                                    <span style={{ fontSize: "0.65rem", color: isFocus ? "#e8c97a" : "#6a6f88", flexShrink: 0 }}>{p.value}%</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      }}
-                    />
-                    {OCCUPATIONS.map((o, i) => (
-                      <Line key={o} type="monotone" dataKey={o}
-                        stroke={OCC_COLORS[i]}
-                        strokeWidth={o === applied.occ ? 3 : 1}
-                        strokeOpacity={o === applied.occ ? 1 : 0.3}
-                        dot={false} />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-                {/* Custom compact legend */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "5px 12px", marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
-                  {OCCUPATIONS.map((o, i) => {
-                    const short = o.replace("Occupations in ", "").replace(" Occupations", "").replace(" and Related Occupations", "");
-                    const isFocus = o === applied.occ;
-                    return (
-                      <div key={o} style={{ display: "flex", alignItems: "center", gap: 6, opacity: isFocus ? 1 : 0.45 }}>
-                        <div style={{ width: isFocus ? 14 : 8, height: 2, background: OCC_COLORS[i], flexShrink: 0, borderRadius: 1 }} />
-                        <span style={{ fontSize: "0.61rem", fontFamily: "'DM Mono',monospace", color: isFocus ? "#e8c97a" : "#4a4f6a", fontWeight: isFocus ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{short}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-               
-              </div>
-            )}
-          </div>
-        )}
 
       </div>
 
@@ -785,7 +828,7 @@ const styles = {
   },
   insightValue: {
     fontSize: "1.4rem", fontFamily: "'Playfair Display',serif",
-    color: "#e8c97a", fontWeight: 700,
+    color: "black", fontWeight: 700,
   },
   insightDelta: { fontSize: "0.75rem", fontFamily: "'DM Mono',monospace", marginTop: 4 },
 
@@ -843,4 +886,18 @@ const styles = {
     background: "#0d0e1a", border: "1px solid #1e2035",
     borderRadius: 8, fontFamily: "'DM Sans',sans-serif", color: "#c4c8e0",
   },
+
+  downloadBtn: {
+	padding: "8px 16px",
+	background: "transparent",
+	border: "1px solid #c9a84c",
+	borderRadius: 8,
+	color: "#c9a84c",
+	cursor: "pointer",
+	fontFamily: "'DM Mono', monospace",
+	fontSize: "0.75rem",
+	letterSpacing: ".08em",
+  },
+
+
 };
