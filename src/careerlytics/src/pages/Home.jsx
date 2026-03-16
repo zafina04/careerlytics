@@ -42,7 +42,7 @@ function NavCard({ page, delay, navigate }) {
       <div style={{ flex: 1 }}>
 
           <div style={s.cardIconEmoji}>{page.icon}</div>
-          <div style={{ ...s.cardLabel, color: hovered ? '#e8c97a' : '#c9a84c' }}>
+          <div style={{ ...s.cardLabel, color: hovered ? '#e8c97a' : '#d4a373' }}>
             {page.label}
           </div>
           <div style={{ ...s.cardDesc, color: hovered ? '#8a8fa8' : '#4a4f6a' }}>
@@ -135,7 +135,7 @@ export default function Home() {
   }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const GOLD       = '#c9a84c'
+const GOLD       = '#bc6c25'
 const GOLD_LIGHT = '#e8c97a'
 const GOLD_DIM   = 'rgba(201,168,76,0.12)'
 const BG_DEEP    = '#080810'
