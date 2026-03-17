@@ -1,17 +1,40 @@
-//About: This page is for our Find Occupation tab
+//This page is for our Find Occupation tab
+//This controls evreything in our Find Occupation page, from the side filters to the change after sumbit is clicked, to showing the graphs
 
 import { color } from 'd3';
 import { useState, useRef} from 'react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
 
+//this is to download the chart
 import html2canvas from 'html2canvas';
 
+//this data.json file contains the parsed data from stats canada's raw data, organized by occupation, province, and employment type, with yearly worker counts for each combination. 
 import rawData from "../../../Data/backend/data.json";
 
 //Storing occupations in a constant array 
 console.log("JSON keys:", Object.keys(rawData));
 
+
+/**
+ * 
+ * export const OCCUPATIONS = [
+
+	'Legislative and senior management occupations',
+	'Specialized middle management occupations'
+
+
+
+
+
+]
+
+ * 
+ * 
+ * 
+ */
+
 export const OCCUPATIONS = [
+
 	'Management occupations',
 	'Business, finance and administration occupations, except management',
 	'Natural and applied sciences and related occupations, except management',
@@ -49,7 +72,7 @@ function buildSeries(occupation, province, empType, yearStart, yearEnd){
 	}
 
 	console.log("Looking up:", occupation, province, empKey);
-  console.log("Result:", rawData[occupation]?.[province]?.[empKey]);
+  	console.log("Result:", rawData[occupation]?.[province]?.[empKey]);
 
 
 	const series = rawData[occupation]?.[province]?.[empKey] ?? [];
@@ -58,63 +81,59 @@ function buildSeries(occupation, province, empType, yearStart, yearEnd){
 }
 
 function buildAllSeries(province, empType, yearStart, yearEnd) {
+
 	const result = {};
+
 	OCCUPATIONS.forEach(o => {
-	  result[o] = buildSeries(o, province, empType, yearStart, yearEnd);
+
+	  	result[o] = buildSeries(o, province, empType, yearStart, yearEnd);
+
 	});
+
 	return result;
+
   }
 
 
 function buildShareData(allSeries, yearStart, yearEnd) {
 
+
 	// build an array of every year in the range
 	const years = [];
 	for (let y = yearStart; y <= yearEnd; y++) {
-	  years.push(y);
+
+	  	years.push(y);
+
 	}
   
 	// for each year, calculate each occupation's % share of total workers
 	return years.map((year, i) => {
+
+	  	const row = { year };
   
-	  const row = { year };
+		// add up total workers across all occupations for this year
+		let total = 0;
+		OCCUPATIONS.forEach(o => {
+			total += allSeries[o][i]?.workers ?? 0;
+		});
+	
+		// calculate each occupation's percentage share
+		OCCUPATIONS.forEach(o => {
+
+			if (total) {
+			row[o] = +((allSeries[o][i]?.workers ?? 0) / total * 100).toFixed(1);
+			} else {
+			row[o] = 0;
+			}
+
+		});
   
-	  // add up total workers across all occupations for this year
-	  let total = 0;
-	  OCCUPATIONS.forEach(o => {
-		total += allSeries[o][i]?.workers ?? 0;
-	  });
-  
-	  // calculate each occupation's percentage share
-	  OCCUPATIONS.forEach(o => {
-		if (total) {
-		  row[o] = +((allSeries[o][i]?.workers ?? 0) / total * 100).toFixed(1);
-		} else {
-		  row[o] = 0;
-		}
-	  });
-  
-	  return row;
+	  	return row;
   
 	});
 
 
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -133,7 +152,6 @@ function FilterLabel({ children }) {
 }
 
 function OccupationList({ selected, onToggle, max = 1 }) {
-
 
   return (
 
@@ -531,9 +549,7 @@ export default function FindOccupation() {
 				{/*This is for the occupation trends chart over the specfic time*/}
 				{activeTab === "trend" && (
 
-					
-
-					
+						
               		<div style={styles.card} ref={chartRef}>
 						
 
@@ -578,22 +594,14 @@ export default function FindOccupation() {
 
 						</ResponsiveContainer>
 
-
-						
-
 						
 
               		</div>
+	
 
-					
-
-            	)}
+            	)} {/*End of activeTab for "trends" chart */}
 
 						
-
-
-
-
 				{/*This for the workforce share chart */}
 				{activeTab === "share" && (
 
@@ -693,7 +701,9 @@ export default function FindOccupation() {
 
 					
 
-            	)}
+            	)} {/*End of the activeTab for the workforce share chart */}
+
+
 
 				<button onClick={downloadChart} style={styles.downloadBtn}>
 					Download Chart
