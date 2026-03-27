@@ -418,12 +418,17 @@ export default function FindOccupation() {
 	let last = 0;
 	let first = 0;
 
+	let peakyear = "-";
+
 	if (chartData.length) {
 	const workerCounts = chartData.map(d => {
 		if (d.workers == null) return 0;
 		return d.workers;
 	});
 	peak = Math.max(...workerCounts);
+
+	const peakYear = chartData.find(d => d.workers === peak)?.year ?? "—";
+
 	last = workerCounts[workerCounts.length - 1];
 	first = workerCounts[0];
 	}
@@ -537,16 +542,16 @@ export default function FindOccupation() {
 					/>
 
 
-					<InsightCard label="Peak Year" value={shareEnd + "%"} delta={+shareDelta}
+					<InsightCard label="Peak Year" value={peak} 
 
-					tooltip="This occupation's share of the total provincial workforce at the end of the period. A falling share means this sector grew slower than the overall workforce — even if absolute numbers rose." 
+					tooltip="test" 
 
 					/>
 
 
 					<InsightCard label="Average Employment" value={shareEnd + "%"} delta={+shareDelta}
 
-					tooltip="This occupation's share of the total provincial workforce at the end of the period. A falling share means this sector grew slower than the overall workforce — even if absolute numbers rose." 
+					tooltip="test" 
 
 					/>
 
@@ -586,7 +591,7 @@ export default function FindOccupation() {
 
 						<ResponsiveContainer width="100%" height={260}>
 							
-							<AreaChart data={chartData}>
+							<AreaChart data={chartData} >
 
 							
 								<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
@@ -596,19 +601,31 @@ export default function FindOccupation() {
 									dataKey="year" 
 									stroke="#4a4f6a" 
 									tick={styles.chartTick} 
-									label={{ value: "Year", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "11px"}}
+									label={{ value: "Years", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "15px"}}
 					
 								/>
 
-								<YAxis stroke="#4a4f6a" tick={styles.chartTick}
+								<YAxis 
+									
+									stroke="#4a4f6a" 
+								
+									tick={styles.chartTick}
 
-									label = {{value: "Workers (Thousands)", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "11px", offset: 10}}
+									width={90}
 
-									tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} 
+									label = {{value: "Workers ", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "15px", offset: 10}}
+
+									//tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} 
+									tickFormatter={v => (v * 1000).toLocaleString()}
 
 								/>
 
-								<Tooltip contentStyle={styles.tooltipBox} />
+								<Tooltip contentStyle={styles.tooltipBox}
+								
+									formatter={(value) => [(value * 1000).toLocaleString(), "workers"]}
+
+								
+								/>
 
 								<Area type="monotone" dataKey="workers"
 
