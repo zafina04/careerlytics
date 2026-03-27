@@ -15,38 +15,56 @@ import rawData from "../../../Data/backend/data.json";
 console.log("JSON keys:", Object.keys(rawData));
 
 
-/**
- * 
- * export const OCCUPATIONS = [
+
+ export const OCCUPATIONS = [
 
 	'Legislative and senior management occupations',
-	'Specialized middle management occupations'
-
-
-
-
+	'Specialized middle management occupations',
+	'Middle management occupations in retail and wholesale trade and customer services',
+	'Middle management occupations in trades, transportation, production and utilities',
+	'Professional occupations in finance',
+	'Professional occupations in business',
+	'Administrative and financial supervisors and specialized administrative occupations',
+	'Administrative occupations and transportation logistics occupations',
+	'Administrative and financial support and supply chain logistics occupations',
+	'Professional occupations in natural sciences',
+	'Professional occupations in applied sciences (except engineering)',
+	'Professional occupations in engineering',
+	'Technical occupations related to natural and applied sciences',
+	'Health treating and consultation services professionals',
+	'Therapy and assessment professionals',
+	'Nursing and allied health professionals',
+	'Technical occupations in health',
+	'Assisting occupations in support of health services',
+	'Professional occupations in law',
+	'Professional occupations in education services',
+	'Professional occupations in social and community services',
+	'Professional occupations in government services',
+	'Occupations in front-line public protection services',
+	'Paraprofessional occupations in legal, social, community and education services',
+	'Assisting occupations in education and in legal and public protection',
+	'Care providers and public protection support occupations and student monitors, crossing guards and related occupations',
+	'Professional occupations in art and culture',
+	'Technical occupations in art, culture and sport',
+	'Occupations in art, culture and sport',
+	'Support occupations in art, culture and sport',
+	'Retail sales and service supervisors and specialized occupations in sales and services',
+	'Occupations in sales and services',
+	'Sales and service representatives and other customer and personal services occupations',
+	'Sales and service support occupations',
+	'Technical trades and transportation officers and controllers',
+	'General trades',
+	'Mail and message distribution, other transport equipment operators and related maintenance workers',
+	'Helpers and labourers and other transport drivers, operators and labourers',
+	'Supervisors and occupations in natural resources, agriculture and related production',
+	'Workers and labourers in natural resources, agriculture and related production',
+	'Supervisors, central control and process operators in processing, manufacturing and utilities and aircraft assemblers and inspectors',
+	'Machine operators, assemblers and inspectors in processing, manufacturing and printing',
+	'Labourers in processing, manufacturing and utilities',
+	'Unclassified occupations',
 
 ]
 
- * 
- * 
- * 
- */
-
-export const OCCUPATIONS = [
-
-	'Management occupations',
-	'Business, finance and administration occupations, except management',
-	'Natural and applied sciences and related occupations, except management',
-	'Health occupations, except management',
-	'Occupations in education, law and social, community and government services, except management',
-	'Occupations in art, culture, recreation and sport, except management',
-	'Sales and service occupations, except management',
-	'Trades, transport and equipment operators and related occupations, except management',
-	'Natural resources, agriculture and related production occupations, except management',
-	'Occupations in manufacturing and utilities, except management',
-	'Unclassified occupations',
-  ];
 
 const PROVINCES = [
 
@@ -396,10 +414,21 @@ export default function FindOccupation() {
 	const chartData  = applied ? allSeries[applied.occ] : [];
 	const shareData  = applied ? buildShareData(allSeries, applied.yearRange[0], applied.yearRange[1]) : [];
 
-	const peak  = chartData.length ? Math.max(...chartData.map(d => d.workers)) : 0;
-	const last  = chartData.length ? chartData[chartData.length - 1].workers    : 0;
-	const first = chartData.length ? chartData[0].workers                       : 0;
-	const delta = first ? Math.round(((last - first) / first) * 100)            : 0;
+	let peak = 0;
+	let last = 0;
+	let first = 0;
+
+	if (chartData.length) {
+	const workerCounts = chartData.map(d => {
+		if (d.workers == null) return 0;
+		return d.workers;
+	});
+	peak = Math.max(...workerCounts);
+	last = workerCounts[workerCounts.length - 1];
+	first = workerCounts[0];
+	}
+
+	const delta = first ? Math.round(((last - first) / first) * 100) : 0;
 
 	const shareStart = shareData.length ? shareData[0][applied?.occ]                    : 0;
 	const shareEnd   = shareData.length ? shareData[shareData.length - 1][applied?.occ] : 0;

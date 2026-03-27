@@ -6,19 +6,54 @@ import {
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 
-const OCCUPATIONS = [
-  'Management Occupations',
-  'Business, Finance and Administration Occupations',
-  'Natural and Applied Sciences and Related Occupations',
-  'Health Occupations, except management',
-  'Occupations in Education, Law and Social, Community and Government Services',
-  'Occupations in Art, Culture, Recreation and Sport',
-  'Sales and Service Occupations',
-  'Trades, Transport and Equipment Operators and Related Occupations',
-  'Natural Resources, Agriculture and Related Production Occupations',
-  'Occupations in Manufacturing and Utilities',
-  'Unclassified Occupations',
-];
+export const OCCUPATIONS = [
+
+	'Legislative and senior management occupations',
+	'Specialized middle management occupations',
+	'Middle management occupations in retail and wholesale trade and customer services',
+	'Middle management occupations in trades, transportation, production and utilities',
+	'Professional occupations in finance',
+	'Professional occupations in business',
+	'Administrative and financial supervisors and specialized administrative occupations',
+	'Administrative occupations and transportation logistics occupations',
+	'Administrative and financial support and supply chain logistics occupations',
+	'Professional occupations in natural sciences',
+	'Professional occupations in applied sciences (except engineering)',
+	'Professional occupations in engineering',
+	'Technical occupations related to natural and applied sciences',
+	'Health treating and consultation services professionals',
+	'Therapy and assessment professionals',
+	'Nursing and allied health professionals',
+	'Technical occupations in health',
+	'Assisting occupations in support of health services',
+	'Professional occupations in law',
+	'Professional occupations in education services',
+	'Professional occupations in social and community services',
+	'Professional occupations in government services',
+	'Occupations in front-line public protection services',
+	'Paraprofessional occupations in legal, social, community and education services',
+	'Assisting occupations in education and in legal and public protection',
+	'Care providers and public protection support occupations and student monitors, crossing guards and related occupations',
+	'Professional occupations in art and culture',
+	'Technical occupations in art, culture and sport',
+	'Occupations in art, culture and sport',
+	'Support occupations in art, culture and sport',
+	'Retail sales and service supervisors and specialized occupations in sales and services',
+	'Occupations in sales and services',
+	'Sales and service representatives and other customer and personal services occupations',
+	'Sales and service support occupations',
+	'Technical trades and transportation officers and controllers',
+	'General trades',
+	'Mail and message distribution, other transport equipment operators and related maintenance workers',
+	'Helpers and labourers and other transport drivers, operators and labourers',
+	'Supervisors and occupations in natural resources, agriculture and related production',
+	'Workers and labourers in natural resources, agriculture and related production',
+	'Supervisors, central control and process operators in processing, manufacturing and utilities and aircraft assemblers and inspectors',
+	'Machine operators, assemblers and inspectors in processing, manufacturing and printing',
+	'Labourers in processing, manufacturing and utilities',
+	'Unclassified occupations',
+
+]
 
 const PROVINCES = [
   "All", "Ontario", "Quebec", "British Columbia", "Alberta",
@@ -403,13 +438,14 @@ const styles = {
     display:   "flex",
     minHeight: "100vh",
     overflow:  "hidden",
+
   },
 
   // Sidebar
   sidePanel: {
     width:         280,
     minWidth:      280,
-    background:    "#0d0e1a",
+    background:    "#FAF3E1",
     borderRight:   "1px solid #1e2035",
     padding:       "1.5rem 1.25rem",
     display:       "flex",
@@ -514,7 +550,7 @@ const styles = {
     flex:       1,
     padding:    "2rem",
     overflowY:  "auto",
-    background: "#080810",
+    background: "#FAF3E1",
   },
 
   // Empty state
