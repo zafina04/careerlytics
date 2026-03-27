@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom'
 // ── Nav pages ─────────────────────────────────────────────────────────────────
 const NAV_PAGES = [
   
-  {route: '/dashboard',label: 'View Occupation Data',desc: 'Live postings across Canada', color: '#2563eb', light: '#eff6ff' },
+  {route: '/dashboard',label: 'View Occupation Data',desc: 'Select an occupation, province, employment type, and year range to view employment trends.', color: '#2563eb', light: '#eff6ff' },
   {route: '/chatbot', label: 'Historical Map Data', desc: 'Trends & growth over time', color: '#0284c7', light: '#e0f2fe' },
-  {route: '/compare', label: 'Compare Occupation Data', desc: 'Side-by-side career analysis', color: '#059669', light: '#ecfdf5' },
-  {route: '/about', label: 'About Us/FAQ', desc: 'Our data, team & mission', color: '#7c3aed', light: '#f5f3ff' },
+  {route: '/compare', label: 'Compare Occupation Data', desc: 'Select occupations, a province, and a year range to compare employment trends.', color: '#059669', light: '#ecfdf5' },
+  {route: '/about', label: 'About Us/FAQ', desc: 'Learn about this project, the data sources used, and find answers to frequently asked questions.', color: '#7c3aed', light: '#f5f3ff' },
 
 ]
 
