@@ -418,19 +418,26 @@ export default function FindOccupation() {
 	let last = 0;
 	let first = 0;
 
-	let peakyear = "-";
+	let peakYear = "-";
+
+	let averageWorkers = 0;
 
 	if (chartData.length) {
-	const workerCounts = chartData.map(d => {
-		if (d.workers == null) return 0;
-		return d.workers;
-	});
-	peak = Math.max(...workerCounts);
 
-	const peakYear = chartData.find(d => d.workers === peak)?.year ?? "—";
+		const workerCounts = chartData.map(d => {
+			if (d.workers == null) return 0;
+			return d.workers;
+		});
+		peak = Math.max(...workerCounts);
 
-	last = workerCounts[workerCounts.length - 1];
-	first = workerCounts[0];
+		peakYear = chartData.find(d => d.workers === peak)?.year ?? "—";
+
+		last = workerCounts[workerCounts.length - 1];
+		first = workerCounts[0];
+
+		averageWorkers = Math.round(workerCounts.reduce((a, b) => a + b, 0) / workerCounts.length);
+
+
 	}
 
 	const delta = first ? Math.round(((last - first) / first) * 100) : 0;
@@ -504,7 +511,7 @@ export default function FindOccupation() {
 				<div>
               		<div style={styles.sectionTag}>
 						
-						OCCUPATION ANALYSIS
+						Selected Occupation for Analysis
 						
 					</div>
 
@@ -513,7 +520,7 @@ export default function FindOccupation() {
               		<div style={styles.resultSubtitle}>
 
 						{/*this shows the time range selected by the user, and province */}
-                		{applied.province} {applied.yearRange[0]} – {applied.yearRange[1]} {applied.empType} 
+                		Filters: {applied.province} / {applied.yearRange[0]} – {applied.yearRange[1]} / {applied.empType} 
 
               		</div>
 
@@ -542,16 +549,16 @@ export default function FindOccupation() {
 					/>
 
 
-					<InsightCard label="Peak Year" value={peak} 
+					<InsightCard label="Peak Year" value={peakYear} 
 
-					tooltip="test" 
+					tooltip="This shows the year that had the most workers" 
 
 					/>
 
 
-					<InsightCard label="Average Employment" value={shareEnd + "%"} delta={+shareDelta}
+					<InsightCard label="Average Employment" value={averageWorkers + "k"} 
 
-					tooltip="test" 
+					tooltip="Shows the average yearly worker count for the selected years" 
 
 					/>
 
@@ -586,8 +593,8 @@ export default function FindOccupation() {
 						
               		<div style={styles.card} ref={chartRef}>
 						
-
-						<div style = {styles.cardLabel}> Total People Overtime (<h2 style={styles.resultTitleGraph}>{applied.occ}</h2>)</div>
+						{/*(<h2 style={styles.resultTitleGraph}>{applied.occ}</h2>)*/}
+						<div style = {styles.cardLabel}> Workers Overtime </div>
 
 						<ResponsiveContainer width="100%" height={260}>
 							
@@ -819,7 +826,7 @@ const styles = {
 
   select: {
     width: "100%", padding: "8px 12px",
-    background: "#0a0a0f", border: "1px solid #1e2035", borderRadius: 8,
+    background: "#F5E7C6", border: "1px solid #1e2035", borderRadius: 8,
     color: "#c4c8e0", fontFamily: "'DM Sans',sans-serif", fontSize: "0.85rem",
     cursor: "pointer", outline: "none",
   },
@@ -865,11 +872,15 @@ const styles = {
   },
   resultTitle: {
     fontFamily: "'Playfair Display',serif", color: "#222222",
-    fontSize: "1.8rem", margin: "4px 0 0",
+    fontSize: "1.4rem", margin: "8px 0 0",
   },
   resultSubtitle: {
-    fontSize: "0.8rem", color: "#4a4f6a", fontFamily: "'DM Mono',monospace",
+
+    fontSize: "0.8rem", color: "#4a4f6a", fontFamily: "'DM Mono',monospace", marginTop: 20,
+
   },
+
+
 
   insightGrid: {
     display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1rem",
@@ -918,8 +929,8 @@ const styles = {
     borderRadius: 12, padding: "1.5rem",
   },
   cardLabel: {
-    fontSize: "0.7rem", color: "#4a4f6a", letterSpacing: ".1em",
-    fontFamily: "'DM Mono',monospace", marginBottom: "1rem",
+    fontSize: "1.2rem", color: "#4a4f6a", letterSpacing: ".1em",
+    fontFamily: "'DM Mono',monospace", marginBottom: "1rem", textAlign: "center",
   },
   mlText: {
     fontSize: "0.9rem", color: "#c4c8e0",

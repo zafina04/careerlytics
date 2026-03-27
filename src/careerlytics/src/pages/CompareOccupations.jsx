@@ -4,6 +4,9 @@ import {
   ResponsiveContainer, Legend
 } from "recharts";
 
+
+import rawData from "../../../Data/backend/data.json";
+
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 
 export const OCCUPATIONS = [
@@ -65,24 +68,93 @@ const CHART_COLORS = ["#c9a84c", "#4e8cff"];
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 
-function buildMockSeries(occ, yearStart, yearEnd) {
-  // Replace with: fetch(`/api/trend/${occ}?year_start=${yearStart}&year_end=${yearEnd}`)
-  const hash  = occ.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-  const start = (hash % 300) + 100;
-  const end   = start * (0.6 + (hash % 10) * 0.08);
-  const years = [];
-  for (let y = yearStart; y <= yearEnd; y += 4) years.push(y);
-  return years.map((year, i) => ({
-    year,
-    workers: Math.round(start + ((end - start) / (years.length - 1)) * i),
-  }));
+
+function buildSeries(occupation, province, empType, yearStart, yearEnd){
+
+	let empKey = "Employment"
+
+	if(empType == "Full Time") {
+
+		empKey = "Full-time employment";
+
+	}
+
+	if (empType == "Part Time") {
+
+		empKey = "Part-time employment";
+	}
+
+	console.log("Looking up:", occupation, province, empKey);
+  	console.log("Result:", rawData[occupation]?.[province]?.[empKey]);
+
+
+	const series = rawData[occupation]?.[province]?.[empKey] ?? [];
+  	return series.filter(d => d.year >= yearStart && d.year <= yearEnd);
+
 }
+
+function buildAllSeries(province, empType, yearStart, yearEnd) {
+
+	const result = {};
+
+	OCCUPATIONS.forEach(o => {
+
+	  	result[o] = buildSeries(o, province, empType, yearStart, yearEnd);
+
+	});
+
+	return result;
+
+  }
+
+
+function buildShareData(allSeries, yearStart, yearEnd) {
+
+
+	// build an array of every year in the range
+	const years = [];
+	for (let y = yearStart; y <= yearEnd; y++) {
+
+	  	years.push(y);
+
+	}
+  
+	// for each year, calculate each occupation's % share of total workers
+	return years.map((year, i) => {
+
+	  	const row = { year };
+  
+		// add up total workers across all occupations for this year
+		let total = 0;
+		OCCUPATIONS.forEach(o => {
+			total += allSeries[o][i]?.workers ?? 0;
+		});
+	
+		// calculate each occupation's percentage share
+		OCCUPATIONS.forEach(o => {
+
+			if (total) {
+			row[o] = +((allSeries[o][i]?.workers ?? 0) / total * 100).toFixed(1);
+			} else {
+			row[o] = 0;
+			}
+
+		});
+  
+	  	return row;
+  
+	});
+
+
+}
+
+
 
 // ─── ML: COSINE SIMILARITY ────────────────────────────────────────────────────
 
-function cosineSimilarity(occ1, occ2, yearStart, yearEnd) {
-  const s1 = buildMockSeries(occ1, yearStart, yearEnd).map(d => d.workers);
-  const s2 = buildMockSeries(occ2, yearStart, yearEnd).map(d => d.workers);
+function cosineSimilarity(occ1, occ2, province, yearStart, yearEnd) {
+  const s1 = buildSeries(occ1, province, "All", yearStart, yearEnd).map(d => d.workers ?? 0);
+  const s2 = buildSeries(occ2, province, "All", yearStart, yearEnd).map(d => d.workers ?? 0);
   const dot    = s1.reduce((sum, v, i) => sum + v * s2[i], 0);
   const mag1   = Math.sqrt(s1.reduce((sum, v) => sum + v * v, 0));
   const mag2   = Math.sqrt(s2.reduce((sum, v) => sum + v * v, 0));
@@ -262,8 +334,10 @@ export default function CompareOccupations() {
 
   // Build merged chart data for both occupations
   const chartData = compared ? (() => {
-    const s1 = buildMockSeries(compared.occs[0], compared.yearRange[0], compared.yearRange[1]);
-    const s2 = buildMockSeries(compared.occs[1], compared.yearRange[0], compared.yearRange[1]);
+    
+    const s1 = buildSeries(compared.occs[0], compared.province, "All", compared.yearRange[0], compared.yearRange[1]);
+    const s2 = buildSeries(compared.occs[1], compared.province, "All", compared.yearRange[0], compared.yearRange[1]);
+
     return s1.map((d, i) => ({
       year: d.year,
       [compared.occs[0]]: d.workers,
@@ -273,7 +347,9 @@ export default function CompareOccupations() {
 
   // ML similarity score
   const similarity = compared
-    ? cosineSimilarity(compared.occs[0], compared.occs[1], compared.yearRange[0], compared.yearRange[1])
+
+    ? cosineSimilarity(compared.occs[0], compared.occs[1], compared.province, compared.yearRange[0], compared.yearRange[1])
+
     : null;
   const simLabel = similarity !== null ? similarityLabel(similarity) : null;
 
@@ -335,7 +411,7 @@ export default function CompareOccupations() {
             {/* Stat cards */}
             <div style={styles.statGrid}>
               {compared.occs.map((occ, i) => {
-                const s     = buildMockSeries(occ, compared.yearRange[0], compared.yearRange[1]);
+                const s = buildSeries(occ, compared.province, "All", compared.yearRange[0], compared.yearRange[1]);
                 const first = s[0]?.workers || 0;
                 const last  = s[s.length - 1]?.workers || 0;
                 const delta = first ? Math.round(((last - first) / first) * 100) : 0;
