@@ -269,7 +269,7 @@ export default function ChatBot() {
   return (
     <div style={{
       display: "flex", alignItems: "center", justifyContent: "center",
-      background: "#080810", padding: "1.5rem",
+      background: "#080810",
       height: "calc(100vh - 60px)",
       overflow: "hidden", boxSizing: "border-box"
     }}>
@@ -292,10 +292,10 @@ export default function ChatBot() {
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             
             <div>
-              <div style={{ fontFamily: "'Playfair Display',serif", color: "#e8c97a", fontSize: "1.05rem", fontWeight: 700 }}>
+              <div style={{ fontFamily: "'Playfair Display',serif", color: "#e8c97a", fontSize: "1.55rem", fontWeight: 700 }}>
                 Careerlytics
               </div>
-              <div style={{ fontSize: "0.65rem", color: "#4a8f7f", fontFamily: "'DM Mono',monospace", letterSpacing: ".06em" }}>
+              <div style={{ fontSize: "0.95rem", color: "#4a8f7f", fontFamily: "'DM Mono',monospace", letterSpacing: ".06em" }}>
                 StatsCan LFS · NOC · 1987–2025
               </div>
             </div>
@@ -305,7 +305,7 @@ export default function ChatBot() {
 
         {/* Messages */}
         <div style={{
-          flex: 1, overflowY: "auto", padding: "1.5rem 1.75rem",
+          flex: 1, overflowY: "auto", padding: "2.5rem 1.45rem",
           display: "flex", flexDirection: "column", gap: "1rem"
         }}>
           {messages.map((m, i) => (
@@ -325,7 +325,7 @@ export default function ChatBot() {
                 borderRadius: m.role === "user" ? "14px 14px 4px 14px" : "4px 14px 14px 14px",
                 background: m.role === "user" ? "rgba(201,168,76,0.15)" : "rgba(13,20,30,0.7)",
                 border: `1px solid ${m.role === "user" ? "rgba(201,168,76,0.25)" : "rgba(106,183,167,0.15)"}`,
-                fontFamily: "'DM Sans',sans-serif", fontSize: "0.87rem",
+                fontFamily: "'DM Sans',sans-serif", fontSize: "1.07rem",
                 color: m.role === "user" ? "#e8c97a" : "#c4c8e0",
                 lineHeight: 1.75, backdropFilter: "blur(4px)",
                 whiteSpace: "pre-line"
@@ -364,7 +364,7 @@ export default function ChatBot() {
               background: "rgba(106,183,167,0.08)",
               border: "1px solid rgba(106,183,167,0.2)",
               borderRadius: 20, color: "#6ab7a7",
-              fontSize: "0.7rem", fontFamily: "'DM Sans',sans-serif",
+              fontSize: "0.9rem", fontFamily: "'DM Sans',sans-serif",
               cursor: "pointer", transition: "all .18s"
             }}
               onMouseEnter={e => { e.currentTarget.style.background = "rgba(106,183,167,0.15)"; e.currentTarget.style.color = "#a8ddd4"; }}
@@ -374,7 +374,7 @@ export default function ChatBot() {
         </div>
 
         {/* Input bar */}
-        <div style={{ padding: "0.85rem 1.75rem 1.25rem" }}>
+        <div style={{ padding: "1.85rem 1.75rem 1.25rem" }}>
           <div style={{
             display: "flex", alignItems: "center",
             background: "rgba(8,8,16,0.6)",

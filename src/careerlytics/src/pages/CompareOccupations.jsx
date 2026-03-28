@@ -4,21 +4,59 @@ import {
   ResponsiveContainer, Legend
 } from "recharts";
 
+
+import rawData from "../../../Data/backend/data.json";
+
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 
-const OCCUPATIONS = [
-  'Management Occupations',
-  'Business, Finance and Administration Occupations',
-  'Natural and Applied Sciences and Related Occupations',
-  'Health Occupations, except management',
-  'Occupations in Education, Law and Social, Community and Government Services',
-  'Occupations in Art, Culture, Recreation and Sport',
-  'Sales and Service Occupations',
-  'Trades, Transport and Equipment Operators and Related Occupations',
-  'Natural Resources, Agriculture and Related Production Occupations',
-  'Occupations in Manufacturing and Utilities',
-  'Unclassified Occupations',
-];
+export const OCCUPATIONS = [
+
+	'Legislative and senior management occupations',
+	'Specialized middle management occupations',
+	'Middle management occupations in retail and wholesale trade and customer services',
+	'Middle management occupations in trades, transportation, production and utilities',
+	'Professional occupations in finance',
+	'Professional occupations in business',
+	'Administrative and financial supervisors and specialized administrative occupations',
+	'Administrative occupations and transportation logistics occupations',
+	'Administrative and financial support and supply chain logistics occupations',
+	'Professional occupations in natural sciences',
+	'Professional occupations in applied sciences (except engineering)',
+	'Professional occupations in engineering',
+	'Technical occupations related to natural and applied sciences',
+	'Health treating and consultation services professionals',
+	'Therapy and assessment professionals',
+	'Nursing and allied health professionals',
+	'Technical occupations in health',
+	'Assisting occupations in support of health services',
+	'Professional occupations in law',
+	'Professional occupations in education services',
+	'Professional occupations in social and community services',
+	'Professional occupations in government services',
+	'Occupations in front-line public protection services',
+	'Paraprofessional occupations in legal, social, community and education services',
+	'Assisting occupations in education and in legal and public protection',
+	'Care providers and public protection support occupations and student monitors, crossing guards and related occupations',
+	'Professional occupations in art and culture',
+	'Technical occupations in art, culture and sport',
+	'Occupations in art, culture and sport',
+	'Support occupations in art, culture and sport',
+	'Retail sales and service supervisors and specialized occupations in sales and services',
+	'Occupations in sales and services',
+	'Sales and service representatives and other customer and personal services occupations',
+	'Sales and service support occupations',
+	'Technical trades and transportation officers and controllers',
+	'General trades',
+	'Mail and message distribution, other transport equipment operators and related maintenance workers',
+	'Helpers and labourers and other transport drivers, operators and labourers',
+	'Supervisors and occupations in natural resources, agriculture and related production',
+	'Workers and labourers in natural resources, agriculture and related production',
+	'Supervisors, central control and process operators in processing, manufacturing and utilities and aircraft assemblers and inspectors',
+	'Machine operators, assemblers and inspectors in processing, manufacturing and printing',
+	'Labourers in processing, manufacturing and utilities',
+	'Unclassified occupations',
+
+]
 
 const PROVINCES = [
   "All", "Ontario", "Quebec", "British Columbia", "Alberta",
@@ -30,24 +68,93 @@ const CHART_COLORS = ["#c9a84c", "#4e8cff"];
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
 
-function buildMockSeries(occ, yearStart, yearEnd) {
-  // Replace with: fetch(`/api/trend/${occ}?year_start=${yearStart}&year_end=${yearEnd}`)
-  const hash  = occ.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-  const start = (hash % 300) + 100;
-  const end   = start * (0.6 + (hash % 10) * 0.08);
-  const years = [];
-  for (let y = yearStart; y <= yearEnd; y += 4) years.push(y);
-  return years.map((year, i) => ({
-    year,
-    workers: Math.round(start + ((end - start) / (years.length - 1)) * i),
-  }));
+
+function buildSeries(occupation, province, empType, yearStart, yearEnd){
+
+	let empKey = "Employment"
+
+	if(empType == "Full Time") {
+
+		empKey = "Full-time employment";
+
+	}
+
+	if (empType == "Part Time") {
+
+		empKey = "Part-time employment";
+	}
+
+	console.log("Looking up:", occupation, province, empKey);
+  	console.log("Result:", rawData[occupation]?.[province]?.[empKey]);
+
+
+	const series = rawData[occupation]?.[province]?.[empKey] ?? [];
+  	return series.filter(d => d.year >= yearStart && d.year <= yearEnd);
+
 }
+
+function buildAllSeries(province, empType, yearStart, yearEnd) {
+
+	const result = {};
+
+	OCCUPATIONS.forEach(o => {
+
+	  	result[o] = buildSeries(o, province, empType, yearStart, yearEnd);
+
+	});
+
+	return result;
+
+  }
+
+
+function buildShareData(allSeries, yearStart, yearEnd) {
+
+
+	// build an array of every year in the range
+	const years = [];
+	for (let y = yearStart; y <= yearEnd; y++) {
+
+	  	years.push(y);
+
+	}
+  
+	// for each year, calculate each occupation's % share of total workers
+	return years.map((year, i) => {
+
+	  	const row = { year };
+  
+		// add up total workers across all occupations for this year
+		let total = 0;
+		OCCUPATIONS.forEach(o => {
+			total += allSeries[o][i]?.workers ?? 0;
+		});
+	
+		// calculate each occupation's percentage share
+		OCCUPATIONS.forEach(o => {
+
+			if (total) {
+			row[o] = +((allSeries[o][i]?.workers ?? 0) / total * 100).toFixed(1);
+			} else {
+			row[o] = 0;
+			}
+
+		});
+  
+	  	return row;
+  
+	});
+
+
+}
+
+
 
 // ─── ML: COSINE SIMILARITY ────────────────────────────────────────────────────
 
-function cosineSimilarity(occ1, occ2, yearStart, yearEnd) {
-  const s1 = buildMockSeries(occ1, yearStart, yearEnd).map(d => d.workers);
-  const s2 = buildMockSeries(occ2, yearStart, yearEnd).map(d => d.workers);
+function cosineSimilarity(occ1, occ2, province, yearStart, yearEnd) {
+  const s1 = buildSeries(occ1, province, "All", yearStart, yearEnd).map(d => d.workers ?? 0);
+  const s2 = buildSeries(occ2, province, "All", yearStart, yearEnd).map(d => d.workers ?? 0);
   const dot    = s1.reduce((sum, v, i) => sum + v * s2[i], 0);
   const mag1   = Math.sqrt(s1.reduce((sum, v) => sum + v * v, 0));
   const mag2   = Math.sqrt(s2.reduce((sum, v) => sum + v * v, 0));
@@ -227,8 +334,10 @@ export default function CompareOccupations() {
 
   // Build merged chart data for both occupations
   const chartData = compared ? (() => {
-    const s1 = buildMockSeries(compared.occs[0], compared.yearRange[0], compared.yearRange[1]);
-    const s2 = buildMockSeries(compared.occs[1], compared.yearRange[0], compared.yearRange[1]);
+    
+    const s1 = buildSeries(compared.occs[0], compared.province, "All", compared.yearRange[0], compared.yearRange[1]);
+    const s2 = buildSeries(compared.occs[1], compared.province, "All", compared.yearRange[0], compared.yearRange[1]);
+
     return s1.map((d, i) => ({
       year: d.year,
       [compared.occs[0]]: d.workers,
@@ -238,7 +347,9 @@ export default function CompareOccupations() {
 
   // ML similarity score
   const similarity = compared
-    ? cosineSimilarity(compared.occs[0], compared.occs[1], compared.yearRange[0], compared.yearRange[1])
+
+    ? cosineSimilarity(compared.occs[0], compared.occs[1], compared.province, compared.yearRange[0], compared.yearRange[1])
+
     : null;
   const simLabel = similarity !== null ? similarityLabel(similarity) : null;
 
@@ -300,7 +411,7 @@ export default function CompareOccupations() {
             {/* Stat cards */}
             <div style={styles.statGrid}>
               {compared.occs.map((occ, i) => {
-                const s     = buildMockSeries(occ, compared.yearRange[0], compared.yearRange[1]);
+                const s = buildSeries(occ, compared.province, "All", compared.yearRange[0], compared.yearRange[1]);
                 const first = s[0]?.workers || 0;
                 const last  = s[s.length - 1]?.workers || 0;
                 const delta = first ? Math.round(((last - first) / first) * 100) : 0;
@@ -403,13 +514,14 @@ const styles = {
     display:   "flex",
     minHeight: "100vh",
     overflow:  "hidden",
+
   },
 
   // Sidebar
   sidePanel: {
     width:         280,
     minWidth:      280,
-    background:    "#0d0e1a",
+    background:    "#FAF3E1",
     borderRight:   "1px solid #1e2035",
     padding:       "1.5rem 1.25rem",
     display:       "flex",
@@ -514,7 +626,7 @@ const styles = {
     flex:       1,
     padding:    "2rem",
     overflowY:  "auto",
-    background: "#080810",
+    background: "#FAF3E1",
   },
 
   // Empty state

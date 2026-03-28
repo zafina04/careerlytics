@@ -22,7 +22,7 @@
 
 body {
   font-family: 'DM Sans', sans-serif;
-  background: var(--white);
+  background: #F5E7C6;
   color: var(--text);
   overflow-x: hidden;
 }
@@ -80,12 +80,12 @@ body {
 }
 
 .nav-links a:hover {
-  color: #e8c97a;
+  color: #d4a373;
   background: rgba(201, 168, 76, 0.08);
 }
 
 .nav-links a.active {
-  color: #c9a84c;
+  color: #bc6c25;
   background: rgba(201, 168, 76, 0.1);
   border: 1px solid rgba(201, 168, 76, 0.2);
 }

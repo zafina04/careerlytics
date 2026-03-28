@@ -1,5 +1,7 @@
-import { Routes, Route, NavLink } from 'react-router-dom'
-import Home from './pages/Home'
+import { Routes, Route, NavLink } from 'react-router-dom';
+import Home from './pages/Home';
+
+import { useLocation } from 'react-router-dom';
 
 import FindOccupation from './pages/FindOccupation'
 
@@ -8,6 +10,10 @@ import AboutUs from './pages/AboutUs'
 import ChatBot from './pages/ChatBot'
 
 import CompareOccupations from './pages/CompareOccupations'
+
+import ChatBotPopup from './components/chatBotPopup'
+
+
 
 // ── Placeholder pages (we'll build these next) ──────────────────────────────
 const Placeholder = ({ title }) => (
@@ -43,6 +49,16 @@ function Navbar() {
 
 // ── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
+
+  const location= useLocation();
+
+  const showChatbot = [
+
+    '/dashboard',
+    '/compare'
+  
+  ].includes(useLocation().pathname);
+
   return (
     <>
       <Navbar />
@@ -54,6 +70,15 @@ export default function App() {
         <Route path="/compare"   element={<CompareOccupations/>} />
         <Route path="/about"     element={<AboutUs/>} />
       </Routes>
+
+      {/*This is to make sure the chatbot is available on all pages */}
+
+
+      {showChatbot && <ChatBotPopup />}
+
     </>
+    
   )
+
+  
 }

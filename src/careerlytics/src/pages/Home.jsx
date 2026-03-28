@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom'
 // ── Nav pages ─────────────────────────────────────────────────────────────────
 const NAV_PAGES = [
   
-  {route: '/dashboard', icon: '', label: 'View Occupation Data',  desc: 'Live postings across Canada', color: '#2563eb', light: '#eff6ff' },
-  {route: '/chatbot',   icon: '', label: 'Historical Map Data', desc: 'Trends & growth over time', color: '#0284c7', light: '#e0f2fe' },
-  {route: '/compare',   icon: '',  label: 'Compare Occupation Data', desc: 'Side-by-side career analysis', color: '#059669', light: '#ecfdf5' },
-  {route: '/about',     icon: '', label: 'About Us/FAQ',       desc: 'Our data, team & mission', color: '#7c3aed', light: '#f5f3ff' },
+  {route: '/dashboard',label: 'View Occupation Data',desc: 'Select an occupation, province, employment type, and year range to view employment trends.', color: '#2563eb', light: '#eff6ff' },
+  {route: '/chatbot', label: 'Historical Map Data', desc: 'Trends & growth over time', color: '#0284c7', light: '#e0f2fe' },
+  {route: '/compare', label: 'Compare Occupation Data', desc: 'Select occupations, a province, and a year range to compare employment trends.', color: '#059669', light: '#ecfdf5' },
+  {route: '/about', label: 'About Us/FAQ', desc: 'Learn about this project, the data sources used, and find answers to frequently asked questions.', color: '#7c3aed', light: '#f5f3ff' },
 
 ]
+
 
 // ── Hover card ───────────────────────────────────
 function NavCard({ page, delay, navigate }) {
@@ -29,7 +30,7 @@ function NavCard({ page, delay, navigate }) {
 
         style={{
           ...s.card,
-          background: hovered ? 'rgba(201,168,76,0.07)' : '#0d0e1a',
+          background: hovered ? '#F5E7C6' : '#F5E7C6',
           borderColor: hovered ? 'rgba(201,168,76,0.35)' : '#1e2035',
           transform: hovered ? 'translateY(-4px) scale(1.01)' : 'translateY(0) scale(1)',
           boxShadow: hovered ? '0 16px 36px rgba(201,168,76,0.12)' : '0 2px 8px rgba(0,0,0,0.2)',
@@ -41,7 +42,7 @@ function NavCard({ page, delay, navigate }) {
       <div style={{ flex: 1 }}>
 
           <div style={s.cardIconEmoji}>{page.icon}</div>
-          <div style={{ ...s.cardLabel, color: hovered ? '#e8c97a' : '#c9a84c' }}>
+          <div style={{ ...s.cardLabel, color: hovered ? '#e8c97a' : '#d4a373' }}>
             {page.label}
           </div>
           <div style={{ ...s.cardDesc, color: hovered ? '#8a8fa8' : '#4a4f6a' }}>
@@ -134,7 +135,7 @@ export default function Home() {
   }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const GOLD       = '#c9a84c'
+const GOLD       = '#bc6c25'
 const GOLD_LIGHT = '#e8c97a'
 const GOLD_DIM   = 'rgba(201,168,76,0.12)'
 const BG_DEEP    = '#080810'
@@ -147,7 +148,7 @@ const s = {
 
     page: {
         minHeight: 'calc(100vh - 60px)',
-        background: BG_DEEP,
+        background: '#FAF3E1',
         position: 'relative',
         overflow: 'hidden',
         display: 'flex',
@@ -218,14 +219,13 @@ const s = {
     h1: {
         fontFamily: "'Playfair Display', serif",
         fontSize: 'clamp(2.8rem, 4vw, 4rem)',
-        fontWeight: 700, color: '#e2d9c4',
+        fontWeight: 700, color: '#222222',
         lineHeight: 1.1, letterSpacing: '-0.01em',
         margin: 0,
     },
       h1Accent: {
 
         color: '#e8c97a',
-
     },
     
     sub: {
@@ -321,6 +321,7 @@ const s = {
         gridTemplateColumns: 'repeat(4, 1fr)',
         gap: '1.25rem',
         width: '100%',
+  
     },
 
   
