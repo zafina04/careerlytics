@@ -1,3 +1,5 @@
+//npm install @emailjs/browser
+
 import React, { useState } from 'react';
 import emailjs from '@emailjs/browser';
 

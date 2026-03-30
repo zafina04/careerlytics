@@ -373,6 +373,62 @@ function InsightCard({ label, value, delta, tooltip }) {
   );
 }
 
+function linearRegression(data) {
+
+	//count all years, which would be 38 years in total, store this in n
+	const n = data.length;
+  
+
+	// calculate the average year and average workers
+	let sumX = 0;
+	let sumY = 0;
+  
+	//loop through the data to get the sum of years and sum of workers, which will be used to calculate the average year and average workers
+	data.forEach(d => {
+
+	  sumX += d.year;
+	  sumY += d.workers;
+
+	});
+  
+	//calculate the average year and average workers by dividing the sum of years and sum of workers by n
+	const meanX = sumX / n;
+
+	const meanY = sumY / n;
+  
+
+	// calculate slope and intercept of the best fit line
+	let numerator = 0;
+	let denominator = 0;
+
+
+	//this part calculates the slope
+	//loops through every year
+	data.forEach(d => {
+		
+		//takes the specfic year (d.year) and subtracts it with the average year (meanX), 
+		// then multiply it with the worker count of that year (d.workers) subtracting with the average worker count (meanY), 
+		// and add this value to the numerator
+	  	numerator += (d.year - meanX) * (d.workers - meanY);
+
+		//takes the specfic year (d.year) and subtracts it with the average year (meanX), 
+		// then square this value, and add it to the denominator
+	  	denominator += (d.year - meanX) * (d.year - meanX);
+
+	});
+	
+	//numerator is the covariance of year and worker count, denominator is the variance of year
+	//calculate the slope by dividing the numerator with the denominator
+	const slope = numerator / denominator;
+
+	//calculate the intercept using the formula: intercept = meanY - slope * meanX
+	const intercept = meanY - slope * meanX;
+  
+	// return a function that predicts workers for any given year
+	return (year) => slope * year + intercept;
+  
+  }
+
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
@@ -420,6 +476,8 @@ export default function FindOccupation() {
 
 	let peakYear = "-";
 
+	let lowYear = "-";
+
 	let averageWorkers = 0;
 
 	if (chartData.length) {
@@ -431,6 +489,8 @@ export default function FindOccupation() {
 		peak = Math.max(...workerCounts);
 
 		peakYear = chartData.find(d => d.workers === peak)?.year ?? "—";
+
+		lowYear = chartData.find(d => d.workers === Math.min(...workerCounts))?.year ?? "—";
 
 		last = workerCounts[workerCounts.length - 1];
 		first = workerCounts[0];
@@ -460,6 +520,87 @@ export default function FindOccupation() {
 		"#f0a050","#4ad8c7","#f77eb8","#a0d070","#f0e070","#90a8b0",
 
 	];
+
+
+	// always use full 1987-2025 data to train the model
+	// regardless of what year range the user selected
+	let fullSeriesData = [];
+
+	if (applied !== null) {
+
+		// get the full employment data for the selected occupation and province
+		// we always use 1987-2025 so the model trains on as much data as possible
+		fullSeriesData = buildSeries(applied.occ, applied.province, applied.empType, 1987, 2025);
+
+	}
+
+	// train the linear regression model on the full dataset
+	// predict is a function that takes a year and returns a predicted worker count
+	let predict = null;
+
+	if (applied !== null) {
+
+		//send the fullSeriesData as the parameter
+		predict = linearRegression(fullSeriesData);
+
+	}
+
+	// calculate R² score to measure how well the regression line fits the historical data
+	// R² of 1.0 = perfect fit (line passes through every point)
+	// R² of 0.0 = no fit (data is too scattered for a straight line)
+	let rSquared = null;
+
+	if (applied !== null) {
+
+		// step 1 — calculate the average worker count across all years
+		let workerSum = 0;
+		fullSeriesData.forEach(d => {
+
+			workerSum += d.workers;
+
+		});
+
+		const meanY = workerSum / fullSeriesData.length;
+
+		// step 2 — calculate total variance (how much workers vary from the average)
+		let ssTot = 0;
+		fullSeriesData.forEach(d => {
+
+			ssTot += (d.workers - meanY) ** 2;
+
+		});
+
+		// step 3 — calculate residual variance (how far the predicted line is from real data)
+		let ssRes = 0;
+		fullSeriesData.forEach(d => {
+
+			ssRes += (d.workers - predict(d.year)) ** 2;
+
+		});
+
+		// step 4 — R² = 1 minus the ratio of unexplained variance to total variance
+		// the closer to 1, the better the line fits the data
+		rSquared = +(1 - ssRes / ssTot).toFixed(2);
+
+	}
+
+	// generate prediction points from 2026 to 2035
+	// each point is { year, predicted } which the chart will use
+	const predictionData = [];
+
+	if (applied !== null) {
+
+		for (let y = 2026; y <= 2035; y++) {
+
+			predictionData.push({
+			year: y,
+			// round to 1 decimal place for cleaner display
+			predicted: Math.round(predict(y) * 10) / 10
+			});
+
+		}
+
+	}
 
   return (
 
@@ -542,7 +683,7 @@ export default function FindOccupation() {
 					
 					/>
 
-					<InsightCard label="Workforce Share" value={shareEnd + "%"} delta={+shareDelta}
+					<InsightCard label="Lowest Year" value={lowYear}
 
 						tooltip="This occupation's share of the total provincial workforce at the end of the period. A falling share means this sector grew slower than the overall workforce — even if absolute numbers rose." 
 						
@@ -594,7 +735,7 @@ export default function FindOccupation() {
               		<div style={styles.card} ref={chartRef}>
 						
 						{/*(<h2 style={styles.resultTitleGraph}>{applied.occ}</h2>)*/}
-						<div style = {styles.cardLabel}> Workers Overtime </div>
+						<div style = {styles.cardLabel}> Workers Overtime ({applied.occ}) </div>
 
 						<ResponsiveContainer width="100%" height={260}>
 							
@@ -655,129 +796,119 @@ export default function FindOccupation() {
             	)} {/*End of activeTab for "trends" chart */}
 
 						
-				{/*This for the workforce share chart */}
-				{activeTab === "share" && (
+				
 
-              		<div style={styles.card}>
+				{/* Prediction chart — only shows on trend tab */}
+				{activeTab === "trend" && applied && (
 
-                		<div style={styles.cardLabel}>SHARE OF TOTAL WORKFORCE — ALL OCCUPATIONS (%)</div>
+					<div style={styles.card}>
 
-                		<div style={styles.shareNote}>
-                  			Relative share corrects for population growth. A falling share means this occupation
-                  			is growing <em>slower</em> than the overall workforce, even if absolute numbers rise.
-                		</div>
+						{/* header */}
+						<div style={styles.cardLabel}>
+							Employment Trend Prediction for 2026 to 2035 — Using Linear Regression
+						</div>
+
+						<div style={{ fontSize: "0.8rem", color: "#4a4f6a", fontFamily: "'DM Mono', monospace", marginBottom: "1rem" }}>
+							Trained on full 1987–2025 dataset · R² = {rSquared} 
+						</div>
+
+						{/* prediction chart */}
+						<ResponsiveContainer width="100%" height={260}>
+
+							<LineChart data={predictionData}>
+
+							<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
+
+							<XAxis 
+								dataKey="year" 
+								stroke="#4a4f6a" 
+								tick={styles.chartTick}
+								label={{ value: "Year", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "11px" }}
+							/>
+
+							<YAxis 
+								stroke="#4a4f6a" 
+								tick={styles.chartTick}
+								tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}
+								label={{ value: "Workers (Thousands)", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "11px", offset: 10 }}
+							/>
+
+							<Tooltip contentStyle={styles.tooltipBox} />
+
+							{/* dotted blue prediction line */}
+							<Line 
+								type="monotone" 
+								dataKey="predicted"
+								stroke="#7eb8f7" 
+								strokeWidth={2}
+								strokeDasharray="5 5"
+								dot={{ fill: "#7eb8f7", r: 4 }}
+							/>
+
+							</LineChart>
+
+						</ResponsiveContainer>
 
 
-                		<ResponsiveContainer width="100%" height={300}>
+				{/* predicted values for 2030 and 2035 */}
+				<div style={{ display: "flex", gap: "1rem", marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
+					
+					<div style={styles.insightCard}>
 
-                  			<LineChart data={shareData}>
+						<div style={styles.insightLabel}>PREDICTED 2030</div>
 
+						<div style={styles.insightValue}>
 
-								<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
-
-								<XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick} />
-								<YAxis stroke="#4a4f6a" tick={styles.chartTick} tickFormatter={v => v + "%"} />
-
-								<Tooltip
-
-									content = {({ active, payload, label }) => {
-
-										if (!active || !payload?.length) return null;
-
-										const sorted = [...payload].sort((a, b) => b.value - a.value);
-
-										return (
-
-											<div style={{
-												background: "#0d0e1a", border: "1px solid #1e2035", borderRadius: 10,
-												padding: "10px 14px", fontFamily: "'DM Mono',monospace",
-												boxShadow: "0 8px 32px rgba(0,0,0,.6)", minWidth: 260,
-											}}>
-
-												<div style={{ fontSize: "0.7rem", color: "#4a4f6a", marginBottom: 8, letterSpacing: ".08em" }}>{label}</div>
-
-												<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 20px" }}>
-
-
-													{sorted.map(p => {
-														const short = p.name.replace("Occupations in ", "").replace(" Occupations", "").replace(" and Related Occupations", "");
-														const isFocus = p.name === applied.occ;
-														return (
-														<div key={p.name} style={{ display: "flex", alignItems: "center", gap: 6, opacity: isFocus ? 1 : 0.5 }}>
-															<div style={{ width: 6, height: 6, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
-															<span style={{ fontSize: "0.65rem", color: isFocus ? "#e8c97a" : "#8a8fa8", fontWeight: isFocus ? 700 : 400, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{short}</span>
-															<span style={{ fontSize: "0.65rem", color: isFocus ? "#e8c97a" : "#6a6f88", flexShrink: 0 }}>{p.value}%</span>
-														</div>
-														);
-													})}
-
-												</div>
-											</div>
-										);
-
-									}}
-
-                    		/>
-							
-							{OCCUPATIONS.map((o, i) => (
-
-								<Line key={o} type="monotone" dataKey={o}
-									stroke={OCC_COLORS[i]}
-									strokeWidth={o === applied.occ ? 3 : 1}
-									strokeOpacity={o === applied.occ ? 1 : 0.3}
-									dot={false} />
-							))}
-
-                  			</LineChart>
-
-                		</ResponsiveContainer>
-
-						{/* Custom compact legend */}
-						<div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "5px 12px", marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
-
-							{OCCUPATIONS.map((o, i) => {
-								const short = o.replace("Occupations in ", "").replace(" Occupations", "").replace(" and Related Occupations", "");
-								const isFocus = o === applied.occ;
-								return (
-								<div key={o} style={{ display: "flex", alignItems: "center", gap: 6, opacity: isFocus ? 1 : 0.45 }}>
-									<div style={{ width: isFocus ? 14 : 8, height: 2, background: OCC_COLORS[i], flexShrink: 0, borderRadius: 1 }} />
-									<span style={{ fontSize: "0.61rem", fontFamily: "'DM Mono',monospace", color: isFocus ? "#e8c97a" : "#4a4f6a", fontWeight: isFocus ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{short}</span>
-								</div>
-								);
-							})}
+							{predict ? Math.round(predict(2030) * 10) / 10 + "k" : "—"}
 
 						</div>
 
-						
-				
-              		</div>
-
-					
-
-            	)} {/*End of the activeTab for the workforce share chart */}
+					</div>
 
 
+					<div style={styles.insightCard}>
 
-				<button onClick={downloadChart} style={styles.downloadBtn}>
-					Download Chart
-				</button>
+						<div style={styles.insightLabel}>PREDICTED 2035</div>
 
+						<div style={styles.insightValue}>
+							{predict ? Math.round(predict(2035) * 10) / 10 + "k" : "—"}
+						</div>
 
-				<div style={{ ...styles.mlText, marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
+					</div>
 
-				<span style={styles.cardLabel}>ML INSIGHT — TREND CLASSIFICATION &nbsp;</span>
-				{delta < -30
-					? `K-Means clustering places ${applied.occ} in the Technological Displacement cluster, rapid decline following mechanisation or infrastructure change.`
-					: delta > 20
-					? `Trend detection classifies ${applied.occ} as Sustained Growth, driven by urbanisation, policy shifts, or industrial expansion.`
-					: `${applied.occ} is Cyclically Stable, fluctuating with economic cycles but maintaining structural presence.`
-				}
-				</div>	
+					<div style={styles.insightCard}>
 
+						<div style={styles.insightLabel}>MODEL FIT (R²)</div>
+
+						<div style={styles.insightValue}>{rSquared}</div>
+
+						<div style={{ fontSize: "0.75rem", color: "#4a4f6a", fontFamily: "'DM Mono', monospace", marginTop: 4 }}>
+							{rSquared >= 0.8 && "Strong fit"}
+							{rSquared >= 0.5 && rSquared < 0.8 && "Moderate fit"}
+							{rSquared < 0.5 && "Weak fit"}
+						</div>
+
+					</div>
+
+				</div>
 
 			</div>
 
 		)}
+
+		<button onClick={downloadChart} style={styles.downloadBtn}>
+
+			Download Chart
+
+		</button>
+
+
+				
+
+
+	</div>
+
+	)}
 
       </div>
 
@@ -805,7 +936,7 @@ const styles = {
   sideFooter:  { display: "flex", gap: 8, marginTop: "auto" },
 
   filterLabel: {
-    fontSize: "0.7rem", color: "#4a4f6a", letterSpacing: ".1em",
+    fontSize: "0.7rem", color: "", letterSpacing: ".1em",
     textTransform: "uppercase", fontFamily: "'DM Mono',monospace", marginBottom: 6,
   },
 
@@ -867,7 +998,7 @@ const styles = {
 
   resultGraph: { display: "flex", flexDirection: "column", gap: "1.5rem" },
   sectionTag: {
-    fontSize: "0.72rem", color: "#4a4f6a",
+    fontSize: "0.72rem", color: "",
     fontFamily: "'DM Mono',monospace", letterSpacing: ".1em",
   },
   resultTitle: {
@@ -929,7 +1060,7 @@ const styles = {
     borderRadius: 12, padding: "1.5rem",
   },
   cardLabel: {
-    fontSize: "1.2rem", color: "#4a4f6a", letterSpacing: ".1em",
+    fontSize: "1.0rem", color: "#4a4f6a", letterSpacing: ".1em",
     fontFamily: "'DM Mono',monospace", marginBottom: "1rem", textAlign: "center",
   },
   mlText: {
