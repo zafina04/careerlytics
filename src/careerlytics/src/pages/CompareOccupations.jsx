@@ -157,7 +157,8 @@ function cosineSimilarity(occ1, occ2, province, yearStart, yearEnd) {
   const s2 = buildSeries(occ2, province, "All", yearStart, yearEnd).map(d => d.workers ?? 0);
   const dot    = s1.reduce((sum, v, i) => sum + v * s2[i], 0);
   const mag1   = Math.sqrt(s1.reduce((sum, v) => sum + v * v, 0));
-  const mag2   = Math.sqrt(s2.reduce((sum, v) => sum + v * v, 0));
+  const mag2 = Math.sqrt(s2.reduce((sum, v) => sum + v * v, 0));
+  if (mag1 === 0 || mag2 === 0) return 0;
   return Math.round((dot / (mag1 * mag2)) * 100);
 }
 
