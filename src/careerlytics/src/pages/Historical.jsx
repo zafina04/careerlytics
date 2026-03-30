@@ -378,7 +378,7 @@ const styles = {
 
   sectionTag: {
     fontSize: "0.72rem",
-    color: "#4a4f6a",
+    color: "",
     fontFamily: "'DM Mono',monospace",
     letterSpacing: ".1em",
   },
@@ -392,7 +392,7 @@ const styles = {
 
   filterLabel: {
     fontSize: "0.7rem",
-    color: "#4a4f6a",
+    color: "",
     letterSpacing: ".1em",
     textTransform: "uppercase",
     fontFamily: "'DM Mono',monospace",
@@ -409,10 +409,10 @@ const styles = {
 
   select: {
     padding: "8px 12px",
-    background: "#0a0a0f",
+    background: "#F5E7C6",
     border: "1px solid #1e2035",
     borderRadius: 8,
-    color: "#c4c8e0",
+    color: "",
     fontFamily: "'DM Sans',sans-serif",
     fontSize: "0.85rem",
     cursor: "pointer",

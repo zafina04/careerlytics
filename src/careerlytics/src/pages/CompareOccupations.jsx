@@ -59,7 +59,7 @@ export const OCCUPATIONS = [
 ]
 
 const PROVINCES = [
-  "All", "Ontario", "Quebec", "British Columbia", "Alberta",
+  "Select One", "Ontario", "Quebec", "British Columbia", "Alberta",
   "Manitoba", "Saskatchewan", "Nova Scotia", "New Brunswick",
   "Newfoundland and Labrador", "Prince Edward Island",
 ];
@@ -397,7 +397,7 @@ export default function CompareOccupations() {
 
             {/* Heading */}
             <div>
-              <div style={styles.sectionTag}>COMPARATIVE ANALYSIS</div>
+              <div style={styles.sectionTag}>Comparison Analysis</div>
               <h2 style={styles.resultTitle}>
                 {compared.occs[0]}
                 <span style={styles.vsLabel}> vs </span>
@@ -544,7 +544,7 @@ const styles = {
   // Filter label
   filterLabel: {
     fontSize:      "0.7rem",
-    color:         "#4a4f6a",
+
     letterSpacing: ".1em",
     textTransform: "uppercase",
     fontFamily:    "'DM Mono',monospace",
@@ -553,7 +553,7 @@ const styles = {
 
   // Occupation list
   occListBox: {
-    background:   "#0a0a0f",
+    background:   "#F5E7C6",
     border:       "1px solid #1e2035",
     borderRadius: 8,
     maxHeight:    220,
@@ -592,10 +592,10 @@ const styles = {
   select: {
     width:        "100%",
     padding:      "8px 12px",
-    background:   "#0a0a0f",
+    background:   "#F5E7C6",
     border:       "1px solid #1e2035",
     borderRadius: 8,
-    color:        "#c4c8e0",
+
     fontFamily:   "'DM Sans',sans-serif",
     fontSize:     "0.85rem",
     cursor:       "pointer",
@@ -673,7 +673,7 @@ const styles = {
   },
   resultTitle: {
     fontFamily: "'Playfair Display',serif",
-    color:      "#e8c97a",
+    color:      "",
     fontSize:   "1.6rem",
     margin:     "4px 0 0",
   },
@@ -693,7 +693,7 @@ const styles = {
     gap:                 "1rem",
   },
   statCard: {
-    background:   "#0d0e1a",
+    background:   "#F5E7C6",
     border:       "1px solid",
     borderRadius: 12,
     padding:      "1.25rem",
@@ -717,7 +717,7 @@ const styles = {
 
   // Generic card
   card: {
-    background:   "#0d0e1a",
+    background:   "#F5E7C6",
     border:       "1px solid #1e2035",
     borderRadius: 12,
     padding:      "1.5rem",
