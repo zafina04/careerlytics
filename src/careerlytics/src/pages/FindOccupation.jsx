@@ -68,7 +68,7 @@ console.log("JSON keys:", Object.keys(rawData));
 
 const PROVINCES = [
 
-  	"All", "Ontario", "Quebec", "British Columbia", "Alberta",
+  	"Select One", "Ontario", "Quebec", "British Columbia", "Alberta",
   	"Manitoba", "Saskatchewan", "Nova Scotia", "New Brunswick",
   	"Newfoundland and Labrador", "Prince Edward Island",
 
@@ -855,7 +855,7 @@ export default function FindOccupation() {
 					
 					<div style={styles.insightCard}>
 
-						<div style={styles.insightLabel}>PREDICTED 2030</div>
+						<div style={styles.insightLabel}>Predicted 2030</div>
 
 						<div style={styles.insightValue}>
 
@@ -868,7 +868,7 @@ export default function FindOccupation() {
 
 					<div style={styles.insightCard}>
 
-						<div style={styles.insightLabel}>PREDICTED 2035</div>
+						<div style={styles.insightLabel}>Predicted 2035</div>
 
 						<div style={styles.insightValue}>
 							{predict ? Math.round(predict(2035) * 10) / 10 + "k" : "—"}
@@ -878,7 +878,7 @@ export default function FindOccupation() {
 
 					<div style={styles.insightCard}>
 
-						<div style={styles.insightLabel}>MODEL FIT (R²)</div>
+						<div style={styles.insightLabel}>Model Fit (R²)</div>
 
 						<div style={styles.insightValue}>{rSquared}</div>
 
@@ -958,7 +958,7 @@ const styles = {
   select: {
     width: "100%", padding: "8px 12px",
     background: "#F5E7C6", border: "1px solid #1e2035", borderRadius: 8,
-    color: "#c4c8e0", fontFamily: "'DM Sans',sans-serif", fontSize: "0.85rem",
+    color: "", fontFamily: "'DM Sans',sans-serif", fontSize: "0.85rem",
     cursor: "pointer", outline: "none",
   },
 
