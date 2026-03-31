@@ -12,6 +12,7 @@ import ChatBot from './pages/ChatBot'
 import CompareOccupations from './pages/CompareOccupations'
 
 import ChatBotPopup from './components/chatBotPopup'
+import Prediction from './pages/Prediction';
 
 
 
@@ -39,7 +40,8 @@ function Navbar() {
         <li><NavLink to="/"             end>Home</NavLink></li>
         <li><NavLink to="/dashboard"       >View Occupation Data</NavLink></li>
         <li><NavLink to="/insight"       >Historical Map Data</NavLink></li>
-        <li><NavLink to="/chatbot"         >Historical Chatbot</NavLink></li>
+        {/*<li><NavLink to="/chatbot"         >Historical Chatbot</NavLink></li>*/}
+        <li><NavLink to="/prediction"         >Occupation Predictor</NavLink></li>
         <li><NavLink to="/compare"         >Compare Occupation Data</NavLink></li>
         <li><NavLink to="/about"           >About Us/FAQ</NavLink></li>
       </ul>
@@ -66,7 +68,7 @@ export default function App() {
         <Route path="/"          element={<Home />} />
         <Route path="/dashboard" element={<FindOccupation />} />
         <Route path="/insight"   element={<Histrocial/>} />
-        <Route path="/chatbot"   element={<ChatBot/>} />
+        <Route path="/prediction"   element={<Prediction/>} />
         <Route path="/compare"   element={<CompareOccupations/>} />
         <Route path="/about"     element={<AboutUs/>} />
       </Routes>
