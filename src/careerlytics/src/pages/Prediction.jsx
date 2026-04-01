@@ -84,41 +84,64 @@ function buildSeries(occupation, province, yearStart, yearEnd) {
 
 function linearRegression(data) {
 
-  const n = data.length;
+	//count all years, which would be 38 years in total, store this in n
+	const n = data.length;
+  
 
-  let sumX = 0;
-  let sumY = 0;
+	// calculate the average year and average workers
+	let sumX = 0;
+	let sumY = 0;
+  
+	//loop through the data to get the sum of years and sum of workers, which will be used to calculate the average year and average workers
+	data.forEach(d => {
 
-  data.forEach(d => {
-    sumX += d.year;
-    sumY += d.workers;
-  });
+	  sumX += d.year;
+	  sumY += d.workers;
 
-  const meanX = sumX / n;
-  const meanY = sumY / n;
+	});
+  
+	//calculate the average year and average workers by dividing the sum of years and sum of workers by n
+	const meanX = sumX / n;
 
-  // numerator is the covariance of year and worker count
-  // denominator is the variance of year
-  let numerator = 0;
-  let denominator = 0;
+	const meanY = sumY / n;
+  
 
-  data.forEach(d => {
-    numerator += (d.year - meanX) * (d.workers - meanY);
-    denominator += (d.year - meanX) * (d.year - meanX);
-  });
+	// calculate slope and intercept of the best fit line
+	let numerator = 0;
+	let denominator = 0;
 
-  const slope = numerator / denominator;
-  const intercept = meanY - slope * meanX;
 
-  return (year) => slope * year + intercept;
+	//this part calculates the slope
+	//loops through every year
+	data.forEach(d => {
+		
+		//takes the specfic year (d.year) and subtracts it with the average year (meanX), 
+		// then multiply it with the worker count of that year (d.workers) subtracting with the average worker count (meanY), 
+		// and add this value to the numerator
+	  	numerator += (d.year - meanX) * (d.workers - meanY);
 
+		//takes the specfic year (d.year) and subtracts it with the average year (meanX), 
+		// then square this value, and add it to the denominator
+	  	denominator += (d.year - meanX) * (d.year - meanX);
+
+	});
+	
+	//numerator is the covariance of year and worker count, denominator is the variance of year
+	//calculate the slope by dividing the numerator with the denominator
+	const slope = numerator / denominator;
+
+	//calculate the intercept using the formula: intercept = meanY - slope * meanX
+	const intercept = meanY - slope * meanX;
+  
+	// return a function that predicts workers for any given year
+	return (year) => slope * year + intercept;
+  
 }
 
 
 
+
 export default function Prediction() {
-
-
 
     const [occupation, setOccupation] = useState(OCCUPATIONS[0]);
     const [province, setProvince]     = useState("Canada");
@@ -129,19 +152,22 @@ export default function Prediction() {
     };
 
     const reset = () => {
+
         setApplied(null);
         setOccupation(OCCUPATIONS[0]);
         setProvince("Canada");
+
     };
+
+    
 
     // get historical data for the chart
     let historicalData = [];
+
     if (applied !== null) {
 
         historicalData = buildSeries(applied.occupation, applied.province, 1987, 2025);
-
     }
-
 
     // always train on full 1987-2025 dataset
     let predict = null;
@@ -150,7 +176,6 @@ export default function Prediction() {
         predict = linearRegression(historicalData);
 
     }
-
 
 
     // calculate R² score
@@ -177,12 +202,16 @@ export default function Prediction() {
     // generate prediction points 2026-2035
     const predictionData = [];
     if (applied !== null) {
+
         for (let y = 2026; y <= 2035; y++) {
-        predictionData.push({
-            year: y,
-            predicted: Math.round(predict(y) * 10) / 10
-        });
+
+            predictionData.push({
+                year: y,
+                predicted: Math.round(predict(y) * 10) / 10
+            });
+
         }
+
     }
 
 
@@ -198,8 +227,10 @@ export default function Prediction() {
         let sumY = 0;
 
         historicalData.forEach(d => {
-        sumX += d.year;
-        sumY += d.workers;
+
+            sumX += d.year;
+            sumY += d.workers;
+
         });
 
         const meanX = sumX / n;
@@ -209,11 +240,11 @@ export default function Prediction() {
         let denominator = 0;
 
         historicalData.forEach(d => {
-        numerator += (d.year - meanX) * (d.workers - meanY);
-        denominator += (d.year - meanX) * (d.year - meanX);
-        });
 
-        
+            numerator += (d.year - meanX) * (d.workers - meanY);
+            denominator += (d.year - meanX) * (d.year - meanX);
+
+        }); 
 
     }
 
@@ -254,22 +285,28 @@ export default function Prediction() {
 
             </div>
 
+
             <div style={styles.filterGroup}>
 
                 <label style={styles.filterLabel}>Province</label>
                 <select
+
                     value={province}
                     onChange={e => setProvince(e.target.value)}
                     style={styles.select}
                 >
+                    
                     {PROVINCES.map(p => <option key={p}>{p}</option>)}
+
                 </select>
 
             </div>
 
             <div style={styles.filterActions}>
-            <button onClick={reset} style={styles.resetBtn}>Reset</button>
-            <button onClick={apply} style={styles.applyBtn}>Generate Forecast</button>
+
+                <button onClick={reset} style={styles.resetBtn}>Reset</button>
+                <button onClick={apply} style={styles.applyBtn}>Generate Forecast</button>
+
             </div>
 
         </div>
@@ -280,13 +317,17 @@ export default function Prediction() {
 
             {/* Empty state */}
             {applied === null && (
-            <div style={styles.emptyState}>
-          
-                <div style={styles.emptyTitle}>Select an Occupation & Province</div>
-                <div style={styles.emptySubtitle}>
-                The model will train on 1987–2025 data and forecast employment through 2035
+
+                <div style={styles.emptyState}>
+            
+                    <div style={styles.emptyTitle}>Select an Occupation & Province</div>
+
+                    <div style={styles.emptySubtitle}>
+                        The model will train on 1987–2025 data and forecast employment through 2035
+                    </div>
+
                 </div>
-            </div>
+
             )}
 
 
@@ -298,37 +339,50 @@ export default function Prediction() {
                 {/* Occupation title */}
                 <div style={styles.resultHeader}>
                 
-                <h2 style={styles.resultTitle}>{applied.occupation}</h2>
-                <div style={styles.resultSub}>{applied.province} / Trained on 1987–2025 Employment data</div>
+                    <h2 style={styles.resultTitle}>{applied.occupation}</h2>
+                    <div style={styles.resultSub}>{applied.province} / Trained on 1987–2025 Employment data</div>
+
                 </div>
 
                 {/* Stat strip */}
                 <div style={styles.statStrip}>
 
                 <div style={styles.stat}>
+
                     <div style={styles.statLabel}>Predicted 2030</div>
+
                     <div style={styles.statValue}>
-                    {predict ? Math.round(predict(2030) * 10) / 10 + "k" : "—"}
+                        {predict ? Math.round(predict(2030) * 10) / 10 + "k" : "—"}
                     </div>
+
                 </div>
 
                 <div style={styles.statDivider} />
 
                 <div style={styles.stat}>
+
                     <div style={styles.statLabel}>Predicted 2035</div>
+
                     <div style={styles.statValue}>
-                    {predict ? Math.round(predict(2035) * 10) / 10 + "k" : "—"}
+                        {predict ? Math.round(predict(2035) * 10) / 10 + "k" : "—"}
                     </div>
+
                 </div>
 
                 <div style={styles.statDivider} />
 
                 <div style={styles.stat}>
+
                     <div style={styles.statLabel}>ANNUAL GROWTH</div>
+
                     <div style={styles.statValue}>
-                    {annualGrowth > 0 ? "+" : ""}{annualGrowth}k/yr
+
+                        {annualGrowth > 0 ? "+" : ""}{annualGrowth}k/yr
+
                     </div>
+
                 </div>
+
 
                 <div style={styles.statDivider} />
 
@@ -336,15 +390,24 @@ export default function Prediction() {
 
                 <div style={styles.statDivider} />
 
+
                 <div style={styles.stat}>
+
                     <div style={styles.statLabel}>MODEL FIT (R²)</div>
+
                     <div style={styles.statValue}>{rSquared}</div>
+
                     <div style={styles.statSub}>
-                    {rSquared >= 0.8 && "Strong fit"}
-                    {rSquared >= 0.5 && rSquared < 0.8 && "Moderate fit"}
-                    {rSquared < 0.5 && "Weak fit"}
+
+                        {rSquared >= 0.8 && "Strong fit"}
+                        {rSquared >= 0.5 && rSquared < 0.8 && "Moderate fit"}
+                        {rSquared < 0.5 && "Weak fit"}
+
                     </div>
+
                 </div>
+
+
 
                 </div>
 
@@ -359,6 +422,7 @@ export default function Prediction() {
                 </div>
 
                 <ResponsiveContainer width="100%" height={280}>
+
                     <LineChart data={predictionData} margin={{ top: 10, right: 20, bottom: 20, left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(201,168,76,0.1)" />
                     <XAxis
@@ -383,6 +447,7 @@ export default function Prediction() {
                         dot={{ fill: "#7eb8f7", r: 4 }}
                     />
                     </LineChart>
+
                 </ResponsiveContainer>
 
                 </div>
@@ -391,11 +456,14 @@ export default function Prediction() {
                 <div style={styles.chartCard}>
 
                 <div style={styles.chartHeader}>
+
                     <div style={styles.chartTitle}>Historical Employment 1987–2025</div>
                     <div style={styles.chartSub}>Actual Statistics Canada data used to train the model</div>
+
                 </div>
 
                 <ResponsiveContainer width="100%" height={280}>
+
                     <AreaChart data={historicalData} margin={{ top: 10, right: 20, bottom: 20, left: 20 }}>
                     <defs>
                         <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
@@ -437,15 +505,18 @@ export default function Prediction() {
 
                 {/* Model explanation */}
                 <div style={styles.mlCard}>
-                <div style={styles.mlTag}>HOW THIS WORKS</div>
-                <p style={styles.mlText}>
-                    This forecast uses <strong>linear regression</strong> — a supervised machine learning algorithm.
-                    The model learns the relationship between year and employment count from 38 years of
-                    Statistics Canada data, then extends that trend forward to 2035.
-                    An R² score of <strong>{rSquared}</strong> indicates a{" "}
-                    {rSquared >= 0.8 ? "strong" : rSquared >= 0.5 ? "moderate" : "weak"} fit,
-                    meaning the historical trend {rSquared >= 0.8 ? "follows a fairly consistent direction" : "has significant variation that limits prediction accuracy"}.
-                </p>
+
+                    <div style={styles.mlTag}>HOW THIS WORKS</div>
+                    
+                    <p style={styles.mlText}>
+                        This forecast uses <strong>linear regression</strong> — a supervised machine learning algorithm.
+                        The model learns the relationship between year and employment count from 38 years of
+                        Statistics Canada data, then extends that trend forward to 2035.
+                        An R² score of <strong>{rSquared}</strong> indicates a{" "}
+                        {rSquared >= 0.8 ? "strong" : rSquared >= 0.5 ? "moderate" : "weak"} fit,
+                        meaning the historical trend {rSquared >= 0.8 ? "follows a fairly consistent direction" : "has significant variation that limits prediction accuracy"}.
+                    </p>
+
                 </div>
 
             </div>

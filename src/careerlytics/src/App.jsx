@@ -39,10 +39,10 @@ function Navbar() {
       <ul className="nav-links">
         <li><NavLink to="/"             end>Home</NavLink></li>
         <li><NavLink to="/dashboard"       >View Occupation Data</NavLink></li>
-        <li><NavLink to="/insight"       >Historical Map Data</NavLink></li>
-        {/*<li><NavLink to="/chatbot"         >Historical Chatbot</NavLink></li>*/}
         <li><NavLink to="/prediction"         >Occupation Predictor</NavLink></li>
         <li><NavLink to="/compare"         >Compare Occupation Data</NavLink></li>
+        <li><NavLink to="/insight"       >Provincial Employment Overview </NavLink></li>
+        {/*<li><NavLink to="/chatbot"         >Historical Chatbot</NavLink></li>*/}
         <li><NavLink to="/about"           >About Us/FAQ</NavLink></li>
       </ul>
     </nav>
@@ -67,8 +67,8 @@ export default function App() {
       <Routes>
         <Route path="/"          element={<Home />} />
         <Route path="/dashboard" element={<FindOccupation />} />
-        <Route path="/insight"   element={<Histrocial/>} />
         <Route path="/prediction"   element={<Prediction/>} />
+        <Route path="/insight"   element={<Histrocial/>} />
         <Route path="/compare"   element={<CompareOccupations/>} />
         <Route path="/about"     element={<AboutUs/>} />
       </Routes>

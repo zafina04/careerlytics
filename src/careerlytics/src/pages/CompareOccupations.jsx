@@ -71,6 +71,7 @@ const CHART_COLORS = ["#c9a84c", "#4e8cff"];
 
 function buildSeries(occupation, province, empType, yearStart, yearEnd){
 
+
 	let empKey = "Employment"
 
 	if(empType == "Full Time") {
@@ -429,6 +430,7 @@ export default function CompareOccupations() {
                 );
               })}
             </div>
+            
 
             {/* Dual line chart */}
             <div style={styles.card}>
@@ -454,6 +456,8 @@ export default function CompareOccupations() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
+
+
 
             {/* ML similarity score */}
             <div style={styles.card}>
@@ -485,15 +489,7 @@ export default function CompareOccupations() {
                     <span>100% Identical</span>
                   </div>
 
-                  {/* Explanation */}
-                  <div style={styles.simText}>
-                    {similarity >= 70
-                      ? `${compared.occs[0]} and ${compared.occs[1]} show strongly correlated workforce trends, likely driven by shared economic cycles or overlapping industry demand.`
-                      : similarity >= 40
-                      ? `These occupations show moderate similarity. While they share some growth patterns, divergence points suggest exposure to different technological or policy forces.`
-                      : `${compared.occs[0]} and ${compared.occs[1]} have largely divergent trajectories. Our K-Means model places them in separate clusters, indicating distinct economic drivers.`
-                    }
-                  </div>
+                  
                 </div>
 
               </div>
@@ -515,6 +511,7 @@ const styles = {
     display:   "flex",
     minHeight: "100vh",
     overflow:  "hidden",
+    
 
   },
 
@@ -620,6 +617,7 @@ const styles = {
     fontWeight:    600,
     letterSpacing: ".03em",
     transition:    "all .2s",
+    marginBottom: 70,
   },
 
   // Main panel
