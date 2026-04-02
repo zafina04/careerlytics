@@ -363,7 +363,7 @@ export default function Historical() {
                         borderBottom: activeTab === tab ? "2px solid #c9a84c" : "2px solid transparent",
                     }}
                     >
-                    {tab === "chart" ? "Bar Chart" : "Map View"}
+                    {tab === "chart" ? "Bar Graph" : "Map View"}
                     </button>
                 ))}
                 </div>
