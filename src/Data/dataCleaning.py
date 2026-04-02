@@ -6,6 +6,7 @@ import re
 INPUT_FILE  = "OccupationsDataset.csv"  
 OUTPUT_FILE = "backend/datatest.json"
 
+#List of all the 10 provinces and Canada has a whole
 PROVINCES = [
     "Canada",
     "Newfoundland and Labrador",
@@ -20,6 +21,7 @@ PROVINCES = [
     "British Columbia",
 ]
 
+#The data is sepreated by labour force, employment (total employment), full-time employment, and part-time employment
 METRICS = ["Labour force", "Employment", "Full-time employment", "Part-time employment"]
 
 YEARS = list(range(1987, 2026))  # 1987 to 2025 inclusive = 39 years
@@ -36,36 +38,79 @@ raw = pd.read_csv(INPUT_FILE, header=None, dtype=str)
 # Row 4: "Persons in thousands" label row - skip
 # Row 5+: Occupation name in col 0, then numeric values
 
+
 # Extract the occupation names (column 0, rows 5 onwards)
+#This is because the first 4 rows are metadata
 data_rows = raw.iloc[5:].copy()
+
+#this will make it start counting at the 5th row, 0,1,2, etc
 data_rows = data_rows.reset_index(drop=True)
 
+
 # Clean occupation names - strip footnote numbers like "13", "14" etc at end
+#Since above we skipped first 5 rows, this function will start reading and extracting from "Total, all occupations 13" row
 def clean_occ_name(name):
+
+    #If the cell is empty return none
     if pd.isna(name):
+
         return None
+    
+    #this converts the occupation name into a string, strip() removes any whitespace
     name = str(name).strip()
+
+
     # Remove trailing footnote numbers (e.g. "Total, all occupations13" -> "Total, all occupations")
+    #this uses regex to remove those numbers at the end of occupation names
     name = re.sub(r'\d+$', '', name).strip()
-    # Remove trailing comma
+
+
+    # Remove trailing comma, since its copied with the comma
     name = name.rstrip(',').strip()
+
+    #return the occupation, if its not empty aka none
     return name if name else None
 
-occupations = [clean_occ_name(r) for r in data_rows.iloc[:, 0]]
+
+
+#occupations = [clean_occ_name(r) for r in data_rows.iloc[:, 0]]
+
+occupations = []
+
+#iloc is "integer location", it allows me to select rows and colunms by their postion number
+#[:, 0] part has two pieces seprated by comma, : means "all rows", from top to bottom
+# 0 means "column 0", which is the first colunm (occupation name)
+for r in data_rows.iloc[:, 0]:
+
+    #this cleans the raw value using the function above
+    cleaned = clean_occ_name(r)
+
+    #then the cleaned occ name gets added to the occupations list
+    occupations.append(cleaned)
+
+
 
 # ── STEP 2: BUILD COLUMN INDEX ────────────────────────────────────────────────
 # Each province has 4 metrics × 39 years = 156 columns
 # Total data columns = 11 provinces × 156 = 1,716 columns (starting at column index 1)
 
-cols_per_metric = len(YEARS)          # 39
-cols_per_province = len(METRICS) * cols_per_metric  # 4 × 39 = 156
+#each metric has 39 colunms, 1987 to 2025
+cols_per_metric = len(YEARS)     
+
+#Metrics is the 4 things, labour force, employment, full-time, part-time, so thats 4*39 = 156
+cols_per_province = len(METRICS) * cols_per_metric  
+
+
 
 def get_col_index(province_idx, metric_idx, year_idx):
+
     """Returns the 0-based column index in the raw dataframe (offset by 1 for occ name col)"""
     return 1 + (province_idx * cols_per_province) + (metric_idx * cols_per_metric) + year_idx
 
+
 # ── STEP 3: PARSE INTO STRUCTURED DATA ───────────────────────────────────────
 def safe_float(val):
+
     """Convert value to float, return None for suppressed/missing values (x, .., etc.)"""
     if pd.isna(val):
         return None
@@ -75,7 +120,9 @@ def safe_float(val):
     except ValueError:
         return None  # handles "x", "..", "F", etc.
 
+
 result = {}
+
 
 for row_idx, occ in enumerate(occupations):
     if occ is None:
@@ -103,6 +150,7 @@ for row_idx, occ in enumerate(occupations):
                     "year": year,
                     "workers": value  # in thousands of persons
                 })
+
 
 # ── STEP 4: SAVE OUTPUT ───────────────────────────────────────────────────────
 import os

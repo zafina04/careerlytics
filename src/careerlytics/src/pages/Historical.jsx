@@ -239,7 +239,7 @@ export default function Historical() {
 
         {/* Heading */}
         <div style={styles.heading}>
-          <div style={styles.sectionTag}>GEOGRAPHIC DISTRIBUTION</div>
+          <div style={styles.sectionTag}>Provincial Employment Overview </div>
           <h2 style={styles.title}>Workers by Province</h2>
         </div>
 

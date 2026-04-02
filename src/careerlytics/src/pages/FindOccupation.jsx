@@ -3,13 +3,16 @@
 
 import { color } from 'd3';
 import { useState, useRef} from 'react'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
+//import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
+import { AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 //this is to download the chart
 import html2canvas from 'html2canvas';
 
 //this data.json file contains the parsed data from stats canada's raw data, organized by occupation, province, and employment type, with yearly worker counts for each combination. 
 import rawData from "../../../Data/backend/data.json";
+
+
 
 //Storing occupations in a constant array 
 console.log("JSON keys:", Object.keys(rawData));
@@ -68,7 +71,7 @@ console.log("JSON keys:", Object.keys(rawData));
 
 const PROVINCES = [
 
-  	"Select One", "Ontario", "Quebec", "British Columbia", "Alberta",
+  	"Select Province", "Ontario", "Quebec", "British Columbia", "Alberta",
   	"Manitoba", "Saskatchewan", "Nova Scotia", "New Brunswick",
   	"Newfoundland and Labrador", "Prince Edward Island",
 
@@ -171,15 +174,39 @@ function FilterLabel({ children }) {
 
 function OccupationList({ selected, onToggle, max = 1 }) {
 
+	const [occSearch, setOccSearch] = useState("");
+
+	const filteredOccupations = OCCUPATIONS.filter(o =>
+		o.toLowerCase().includes(occSearch.toLowerCase())
+	  );
+
   return (
 
     <div>
+		
 
       <FilterLabel>Occupation — Select One</FilterLabel>
 
+	  	<input
+			type="text"
+			placeholder="Search occupations..."
+			value={occSearch}
+			onClick={(e) => e.stopPropagation()}
+			onChange={(e) => setOccSearch(e.target.value)}
+			style={{
+				width: "100%",
+				padding: "6px 8px",
+				marginBottom: "8px",
+				borderRadius: 6,
+				border: "1px solid #2e3050",
+				fontSize: "0.8rem",
+				backgroundColor: "#F5E7C6",
+			}}
+		/>
+
       <div style={styles.occListBox}>
 
-        {OCCUPATIONS.map(o => {
+	  {filteredOccupations.map(o => {
 
           const isSelected = selected.includes(o);
           const isDisabled = !isSelected && selected.length >= max;
@@ -430,12 +457,12 @@ function linearRegression(data) {
   }
 
 
-// ── Main ──────────────────────────────────────────────────────────────────────
+// ── Main ─────────────────────────────────────────────────────────────────────-----------------
 
 export default function FindOccupation() {
 
 	const [selected,  setSelected]  = useState([]);
-	const [province,  setProvince]  = useState("All");
+	const [province,  setProvince]  = useState("");
 	const [yearRange, setYearRange] = useState([1987, 2025]);
 	const [empType,   setEmpType]   = useState("All");
 	const [applied,   setApplied]   = useState(null);
@@ -443,21 +470,66 @@ export default function FindOccupation() {
 
 	const chartRef = useRef(null);
 
+	const [chartType, setChartType] = useState("line");
+
+	const [chartColor, setChartColor]       = useState("#c9a84c");  // default gold
+const [lineType, setLineType]           = useState("monotone"); // smooth or sharp
+const [showDots, setShowDots]           = useState(true);       // show data points
+const [showGrid, setShowGrid]           = useState(true);       // show grid lines
+const [showCustomize, setShowCustomize] = useState(false);      // show/hide the panel
+
 	//function for donwlaoding the chart
 	const downloadChart = () => {
+
 		html2canvas(chartRef.current).then(canvas => {
-		const link = document.createElement('a');
-		link.download = `${applied.occ}-${applied.province}.png`;
-		link.href = canvas.toDataURL();
-		link.click();
+
+			const link = document.createElement('a');
+			link.download = `${applied.occ}-${applied.province}.png`;
+			link.href = canvas.toDataURL();
+			link.click();
+
 		});
+
 	};
 
   	const toggleOcc = o =>
     	setSelected(prev => prev.includes(o) ? prev.filter(x => x !== o) : [...prev, o]);
 
+	  const [errors, setErrors] = useState({});
+
   	const apply = () => {
-    	if (selected.length) setApplied({ occ: selected[0], province, yearRange, empType });
+
+		const newErrors = {};
+
+    	//if (selected.length) setApplied({ occ: selected[0], province, yearRange, empType });
+
+		if (!selected.length) {
+			newErrors.occ = "Please select an occupation";
+		}
+
+		if (!province || province === "Select Province") {
+			newErrors.province = "Please select a province";
+		  }
+
+
+		  // If errors exist, show them and stop
+			if (Object.keys(newErrors).length > 0) {
+				setErrors(newErrors);
+				return;
+			}
+
+			// Clear errors if valid
+			setErrors({});
+
+			setApplied({
+				occ: selected[0],
+				province,
+				yearRange,
+				empType
+			});
+
+			console.log("Province:", province);
+
   	};
 
 	const reset = () => {
@@ -611,7 +683,18 @@ export default function FindOccupation() {
       	<SidePanel>
 
         	<OccupationList selected={selected} onToggle={toggleOcc} max={1} />
+			{errors.occ && (
+				<div style={{ color: "#ff6b6b", fontSize: "0.75rem", marginTop: "4px" }}>
+					{errors.occ}
+				</div>
+			)}
+
         	<ProvinceSelect value={province} onChange={setProvince} />
+			{errors.province && (
+				<div style={styles.errorText}>
+					{errors.province}
+				</div>
+			)}
         	<EmploymentType value={empType} onChange={setEmpType} />
         	<YearRange value={yearRange} onChange={setYearRange} />
 
@@ -726,67 +809,116 @@ export default function FindOccupation() {
 
             	</div>
 
+				<div style={{ display: "flex", gap: 8, marginBottom: "1rem" }}>
+
+					{["line", "bar", "area"].map(type => (
+						<button
+						key={type}
+						onClick={() => setChartType(type)}
+						style={{
+							padding: "4px 12px",
+							borderRadius: 4,
+							border: chartType === type ? "1px solid #c9a84c" : "1px solid #2e3050",
+							background: chartType === type ? "rgba(201,168,76,0.15)" : "transparent",
+							color: chartType === type ? "#c9a84c" : "#4a4f6a",
+							fontFamily: "'DM Mono',monospace",
+							fontSize: "0.65rem",
+							letterSpacing: ".08em",
+							cursor: "pointer",
+							textTransform: "uppercase",
+						}}
+						>
+						{type}
+						</button>
+					))}
+
+				</div>
+
+
 
 
 				{/*This is for the occupation trends chart over the specfic time*/}
 				{activeTab === "trend" && (
 
+					
 						
               		<div style={styles.card} ref={chartRef}>
 						
 						{/*(<h2 style={styles.resultTitleGraph}>{applied.occ}</h2>)*/}
 						<div style = {styles.cardLabel}> Workers Overtime ({applied.occ}) </div>
 
-						<ResponsiveContainer width="100%" height={260}>
-							
-							<AreaChart data={chartData} >
+				
 
-							
+
+							{/* Bar chart */}
+							{chartType === "bar" && (
+
+								<ResponsiveContainer width="100%" height={260}>
+
+								<BarChart data={chartData}>
 								<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
-
-								<XAxis 
-									
-									dataKey="year" 
-									stroke="#4a4f6a" 
-									tick={styles.chartTick} 
-									label={{ value: "Years", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "15px"}}
-					
-								/>
-
-								<YAxis 
-									
-									stroke="#4a4f6a" 
-								
-									tick={styles.chartTick}
-
-									width={90}
-
-									label = {{value: "Workers ", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "15px", offset: 10}}
-
-									//tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} 
-									tickFormatter={v => (v * 1000).toLocaleString()}
-
-								/>
-
+								<XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick}
+									label={{ value: "Years", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "15px" }} />
+								<YAxis stroke="#4a4f6a" tick={styles.chartTick} width={90}
+									label={{ value: "Workers", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "15px", offset: 10 }}
+									tickFormatter={v => (v * 1000).toLocaleString()} />
 								<Tooltip contentStyle={styles.tooltipBox}
-								
-									formatter={(value) => [(value * 1000).toLocaleString(), "workers"]}
+									formatter={v => [(v * 1000).toLocaleString(), "workers"]} />
+								<Bar dataKey="workers" fill="#c9a84c" radius={[4, 4, 0, 0]} />
+								</BarChart>
+		
+								</ResponsiveContainer>
 
-								
-								/>
-
-								<Area type="monotone" dataKey="workers"
-
+							)}
+    
+							
+							{/* Line chart */}
+							{chartType === "line" && (
+							<ResponsiveContainer width="100%" height={260}>
+								<LineChart data={chartData}>
+								<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
+								<XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick}
+									label={{ value: "Years", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "15px" }} />
+								<YAxis stroke="#4a4f6a" tick={styles.chartTick} width={90}
+									label={{ value: "Workers", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "15px", offset: 10 }}
+									tickFormatter={v => (v * 1000).toLocaleString()} />
+								<Tooltip contentStyle={styles.tooltipBox}
+									formatter={v => [(v * 1000).toLocaleString(), "workers"]} />
+								<Line type="monotone" dataKey="workers"
 									stroke="#c9a84c" strokeWidth={2}
-									fill="url(#areaGrad)" dot={{ fill: "#c9a84c", r: 4 }} 
-								
-								/>
+									dot={{ fill: "#c9a84c", r: 4 }} />
+								</LineChart>
+							</ResponsiveContainer>
+							)}
 
-							</AreaChart>
+
+							{/* Area chart */}
+							{chartType === "area" && (
+							<ResponsiveContainer width="100%" height={260}>
+								<AreaChart data={chartData}>
+								<defs>
+									<linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+									<stop offset="5%" stopColor="#c9a84c" stopOpacity={0.9} />
+									<stop offset="95%" stopColor="#c9a84c" stopOpacity={0.9} />
+									</linearGradient>
+								</defs>
+								<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
+								<XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick}
+									label={{ value: "Years", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "15px" }} />
+								<YAxis stroke="#4a4f6a" tick={styles.chartTick} width={90}
+									label={{ value: "Workers", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "15px", offset: 10 }}
+									tickFormatter={v => (v * 1000).toLocaleString()} />
+								<Tooltip contentStyle={styles.tooltipBox}
+									formatter={v => [(v * 1000).toLocaleString(), "workers"]} />
+								<Area type="monotone" dataKey="workers"
+									stroke="#c9a84c" strokeWidth={2}
+									fill="url(#areaGrad)" dot={{ fill: "#c9a84c", r: 4 }} />
+								</AreaChart>
+							</ResponsiveContainer>
+							)}
 
 							
 
-						</ResponsiveContainer>
 
 						
 
@@ -796,106 +928,11 @@ export default function FindOccupation() {
             	)} {/*End of activeTab for "trends" chart */}
 
 						
+						
 				
 
-				{/* Prediction chart — only shows on trend tab */}
-				{activeTab === "trend" && applied && (
 
-					<div style={styles.card}>
-
-						{/* header */}
-						<div style={styles.cardLabel}>
-							Employment Trend Prediction for 2026 to 2035 — Using Linear Regression
-						</div>
-
-						<div style={{ fontSize: "0.8rem", color: "#4a4f6a", fontFamily: "'DM Mono', monospace", marginBottom: "1rem" }}>
-							Trained on full 1987–2025 dataset · R² = {rSquared} 
-						</div>
-
-						{/* prediction chart */}
-						<ResponsiveContainer width="100%" height={260}>
-
-							<LineChart data={predictionData}>
-
-							<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
-
-							<XAxis 
-								dataKey="year" 
-								stroke="#4a4f6a" 
-								tick={styles.chartTick}
-								label={{ value: "Year", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "11px" }}
-							/>
-
-							<YAxis 
-								stroke="#4a4f6a" 
-								tick={styles.chartTick}
-								tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}
-								label={{ value: "Workers (Thousands)", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "11px", offset: 10 }}
-							/>
-
-							<Tooltip contentStyle={styles.tooltipBox} />
-
-							{/* dotted blue prediction line */}
-							<Line 
-								type="monotone" 
-								dataKey="predicted"
-								stroke="#7eb8f7" 
-								strokeWidth={2}
-								strokeDasharray="5 5"
-								dot={{ fill: "#7eb8f7", r: 4 }}
-							/>
-
-							</LineChart>
-
-						</ResponsiveContainer>
-
-
-				{/* predicted values for 2030 and 2035 */}
-				<div style={{ display: "flex", gap: "1rem", marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #1e2035" }}>
-					
-					<div style={styles.insightCard}>
-
-						<div style={styles.insightLabel}>Predicted 2030</div>
-
-						<div style={styles.insightValue}>
-
-							{predict ? Math.round(predict(2030) * 10) / 10 + "k" : "—"}
-
-						</div>
-
-					</div>
-
-
-					<div style={styles.insightCard}>
-
-						<div style={styles.insightLabel}>Predicted 2035</div>
-
-						<div style={styles.insightValue}>
-							{predict ? Math.round(predict(2035) * 10) / 10 + "k" : "—"}
-						</div>
-
-					</div>
-
-					<div style={styles.insightCard}>
-
-						<div style={styles.insightLabel}>Model Fit (R²)</div>
-
-						<div style={styles.insightValue}>{rSquared}</div>
-
-						<div style={{ fontSize: "0.75rem", color: "#4a4f6a", fontFamily: "'DM Mono', monospace", marginTop: 4 }}>
-							{rSquared >= 0.8 && "Strong fit"}
-							{rSquared >= 0.5 && rSquared < 0.8 && "Moderate fit"}
-							{rSquared < 0.5 && "Weak fit"}
-						</div>
-
-					</div>
-
-				</div>
-
-			</div>
-
-		)}
-
+				
 		<button onClick={downloadChart} style={styles.downloadBtn}>
 
 			Download Chart
@@ -979,7 +1016,7 @@ const styles = {
   actionBtn: {
     padding: "9px 20px", borderRadius: 8, cursor: "pointer",
     fontFamily: "'DM Sans',sans-serif", fontSize: "0.85rem",
-    fontWeight: 600, letterSpacing: ".03em", transition: "all .2s",
+    fontWeight: 600, letterSpacing: ".03em", transition: "all .2s", marginBottom: 70,
   },
 
   //background: "#080810" 
