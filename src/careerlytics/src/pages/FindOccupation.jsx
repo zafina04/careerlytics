@@ -628,7 +628,7 @@ export default function FindOccupation() {
 	const TABS = [
 
 		{ id: "trend", label: "Trend" },
-		{ id: "share", label: "Workforce Share" },
+		//{ id: "share", label: "Workforce Share" },
 
 	];
 
