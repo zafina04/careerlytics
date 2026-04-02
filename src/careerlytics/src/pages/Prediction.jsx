@@ -371,18 +371,6 @@ export default function Prediction() {
 
                 <div style={styles.statDivider} />
 
-                <div style={styles.stat}>
-
-                    <div style={styles.statLabel}>ANNUAL GROWTH</div>
-
-                    <div style={styles.statValue}>
-
-                        {annualGrowth > 0 ? "+" : ""}{annualGrowth}k/yr
-
-                    </div>
-
-                </div>
-
 
                 <div style={styles.statDivider} />
 
@@ -507,7 +495,7 @@ export default function Prediction() {
                 <div style={styles.mlCard}>
 
                     <div style={styles.mlTag}>HOW THIS WORKS</div>
-                    
+
                     <p style={styles.mlText}>
                         This forecast uses <strong>linear regression</strong> — a supervised machine learning algorithm.
                         The model learns the relationship between year and employment count from 38 years of
