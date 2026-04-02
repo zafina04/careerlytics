@@ -462,7 +462,7 @@ export default function CompareOccupations() {
             {/* ML similarity score */}
             <div style={styles.card}>
             {/*ML INSIGHT - COSINE SIMILARITY SCORE */}
-              <div style={styles.cardLabel}>ML INSIGHT — SIMILARITY SCORE</div>
+              <div style={styles.cardLabel}>COSINE SIMILARITY SCORE</div>
               <div style={styles.simRow}>
 
                 {/* Score gauge */}
