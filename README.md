@@ -37,5 +37,6 @@ Welcome to Careerlytics!
 Trello: https://trello.com/b/KrqY3Dfe/ios-update
 
 
-<img width="1438" height="814" alt="Screenshot 2026-03-13 at 2 38 33 PM" src="https://github.com/user-attachments/assets/0da3dd37-9b1d-4ab4-a071-99ce22fd2044" />
+
+<img width="1462" height="832" alt="Screenshot 2026-04-03 at 10 56 34 PM" src="https://github.com/user-attachments/assets/d0e58f07-6d03-4e4d-a199-c2eca78310d6" />
 
