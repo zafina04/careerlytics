@@ -76,7 +76,7 @@ export default function App() {
       {/*This is to make sure the chatbot is available on all pages */}
 
 
-      {showChatbot && <ChatBotPopup />}
+   
 
     </>
     

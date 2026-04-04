@@ -113,7 +113,7 @@ export default function Home() {
               style={{ ...s.btnPrimary, ...(primaryHover ? s.btnPrimaryHover : {}) }}
               onMouseEnter={() => setPrimaryHover(true)}
               onMouseLeave={() => setPrimaryHover(false)}
-              onClick={() => navigate('/chatbot')}
+              onClick={() => navigate('/dashboard')}
             >
               Explore Trends
             </button>

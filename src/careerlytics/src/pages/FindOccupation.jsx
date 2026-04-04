@@ -18,7 +18,7 @@ import rawData from "../../../Data/backend/data.json";
 console.log("JSON keys:", Object.keys(rawData));
 
 
-
+//list of all occupations
  export const OCCUPATIONS = [
 
 	'Legislative and senior management occupations',
@@ -68,7 +68,7 @@ console.log("JSON keys:", Object.keys(rawData));
 
 ]
 
-
+//list of all provinces
 const PROVINCES = [
 
   	"Select Province", "Ontario", "Quebec", "British Columbia", "Alberta",
@@ -77,6 +77,7 @@ const PROVINCES = [
 
 ];
 
+//this function actualyl extracts from the real data 
 function buildSeries(occupation, province, empType, yearStart, yearEnd){
 
 	let empKey = "Employment"
@@ -101,19 +102,25 @@ function buildSeries(occupation, province, empType, yearStart, yearEnd){
 
 }
 
+//build series for all the occupations
 function buildAllSeries(province, empType, yearStart, yearEnd) {
 
+	//create empty object to store the series for each occupation
 	const result = {};
 
+	//loop through every occupation
 	OCCUPATIONS.forEach(o => {
 
+		//call buildSeries function for each occupation and store the result in the result object with the occupation as the key
 	  	result[o] = buildSeries(o, province, empType, yearStart, yearEnd);
 
 	});
 
+	//returns the full dataset
 	return result;
 
-  }
+}
+
 
 
 function buildShareData(allSeries, yearStart, yearEnd) {
@@ -160,89 +167,97 @@ function buildShareData(allSeries, yearStart, yearEnd) {
 
 // ── components ────--
 
+//container for the side panel, children is whatever is placed inside the componenet
 function SidePanel({ children }) {
 
   	return <div style={styles.sidePanel}>{children}</div>;
 
 }
 
+//This displays filter labels like province, occupation, year range, and employment type
 function FilterLabel({ children }) {
 
   	return <div style={styles.filterLabel}>{children}</div>;
 
 }
 
+//this is the component for selecting occupation, with a search bar, and a list of occupations with checkboxes, allowing only one occupation to be selected at a time. It also has a max prop to limit the number of selections, which is set to 1 by default.
 function OccupationList({ selected, onToggle, max = 1 }) {
 
+	//stores search text state
 	const [occSearch, setOccSearch] = useState("");
 
 	const filteredOccupations = OCCUPATIONS.filter(o =>
+
 		o.toLowerCase().includes(occSearch.toLowerCase())
-	  );
 
-  return (
+	);
 
-    <div>
-		
+  	return (
 
-      <FilterLabel>Occupation — Select One</FilterLabel>
 
-	  	<input
-			type="text"
-			placeholder="Search occupations..."
-			value={occSearch}
-			onClick={(e) => e.stopPropagation()}
-			onChange={(e) => setOccSearch(e.target.value)}
-			style={{
-				width: "100%",
-				padding: "6px 8px",
-				marginBottom: "8px",
-				borderRadius: 6,
-				border: "1px solid #2e3050",
-				fontSize: "0.8rem",
-				backgroundColor: "#F5E7C6",
-			}}
-		/>
+		<div>
 
-      <div style={styles.occListBox}>
-
-	  {filteredOccupations.map(o => {
-
-          const isSelected = selected.includes(o);
-          const isDisabled = !isSelected && selected.length >= max;
-
-          return (
+			<FilterLabel>Occupation — Select One</FilterLabel>
 			
-            <label key={o} style={{
-              ...styles.occItem,
-              cursor:     isDisabled ? "not-allowed" : "pointer",
-              opacity:    isDisabled ? 0.35 : 1,
-              background: isSelected ? "rgba(201,168,76,.1)" : "transparent",
-            }}>
-              <div style={{
-                ...styles.checkbox,
-                border:     isSelected ? "none" : "1px solid #2e3050",
-                background: isSelected ? "#c9a84c" : "transparent",
-              }}>
-                {isSelected && <div style={styles.checkboxInner} />}
-              </div>
-              <input type="checkbox" checked={isSelected}
-                onChange={() => !isDisabled && onToggle(o)}
-                style={{ display: "none" }} />
-              <span style={{ ...styles.occLabel, color: isSelected ? "#222222" : "#000000" }}>
-                {o}
-              </span>
-            </label>
+			<input
+				type="text"
+				placeholder="Search occupations..."
+				value={occSearch}
+				onClick={(e) => e.stopPropagation()}
+				onChange={(e) => setOccSearch(e.target.value)}
+				style={{
+					width: "100%",
+					padding: "6px 8px",
+					marginBottom: "8px",
+					borderRadius: 6,
+					border: "1px solid #2e3050",
+					fontSize: "0.8rem",
+					backgroundColor: "#F5E7C6",
+				}}
+			/>
 
-          );
 
-        })}
+			<div style={styles.occListBox}>
 
-      </div>
 
-    </div>
+				{filteredOccupations.map(o => {
 
-  ); //End of return
+					const isSelected = selected.includes(o);
+					const isDisabled = !isSelected && selected.length >= max;
+
+					return (
+						
+						<label key={o} style={{
+						...styles.occItem,
+						cursor:     isDisabled ? "not-allowed" : "pointer",
+						opacity:    isDisabled ? 0.35 : 1,
+						background: isSelected ? "rgba(201,168,76,.1)" : "transparent",
+						}}>
+						<div style={{
+							...styles.checkbox,
+							border:     isSelected ? "none" : "1px solid #2e3050",
+							background: isSelected ? "#c9a84c" : "transparent",
+						}}>
+							{isSelected && <div style={styles.checkboxInner} />}
+						</div>
+						<input type="checkbox" checked={isSelected}
+							onChange={() => !isDisabled && onToggle(o)}
+							style={{ display: "none" }} />
+						<span style={{ ...styles.occLabel, color: isSelected ? "#222222" : "#000000" }}>
+							{o}
+						</span>
+						</label>
+
+					);
+
+				})}
+
+			</div>
+
+		</div>
+
+  	); //End of return
 
 } //end of OccupationList function
 
@@ -250,43 +265,58 @@ function OccupationList({ selected, onToggle, max = 1 }) {
 //function for selecting province, with a dropdown menu and label
 function ProvinceSelect({ value, onChange }) {
 
-  return (
-    <div>
-      <FilterLabel>Province</FilterLabel>
-      <select value={value} onChange={e => onChange(e.target.value)} style={styles.select}>
-        {PROVINCES.map(p => <option key={p}>{p}</option>)}
-      </select>
-    </div>
-  );
+	return (
+
+		<div>
+
+			<FilterLabel>Province</FilterLabel>
+			<select value={value} onChange={e => onChange(e.target.value)} style={styles.select}>
+				{PROVINCES.map(p => <option key={p}>{p}</option>)}
+			</select>
+
+		</div>
+
+	);
 
 }
 
 
-//function for selecting the employment type
+//function for selecting the employment type, the buttons
 function EmploymentType({ value, onChange }) {
 
+	//the options
   	const options = ["All", "Full Time", "Part Time"];
+
   	return (
+
     	<div>
-      	<FilterLabel>Employment Type</FilterLabel>
-      	<div style={styles.empToggleRow}>
-        	{options.map(o => (
-          	<button key={o} onClick={() => onChange(o)} style={{
-            ...styles.empToggleBtn,
-            background: value === o ? "rgba(201,168,76,.15)" : "transparent",
-            color:      value === o ? "#e8c97a" : "#4a4f6a",
-            border:     value === o ? "1px solid #c9a84c" : "1px solid #1e2035",
-          }}>
-            {o}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+
+			<FilterLabel>Employment Type</FilterLabel>
+
+			<div style={styles.empToggleRow}>
+
+					{options.map(o => (
+					<button key={o} onClick={() => onChange(o)} style={{
+					...styles.empToggleBtn,
+					background: value === o ? "rgba(201,168,76,.15)" : "transparent",
+					color:      value === o ? "#e8c97a" : "#4a4f6a",
+					border:     value === o ? "1px solid #c9a84c" : "1px solid #1e2035",
+					}}>
+					{o}
+				</button>
+				))}
+
+      		</div>
+
+    	</div>
+
+  	);
 }
+
 
 //function to select tyear range, with a slider and labels
 function YearRange({ value, onChange }) {
+
 
   	const MIN = 1987;
   	const MAX = 2025;
@@ -304,59 +334,63 @@ function YearRange({ value, onChange }) {
 		onChange([value[0], v]);
 	};
 
-  return (
-    <div>
-      <FilterLabel>Year Range: {value[0]} – {value[1]}</FilterLabel>
-      <style>{`
-        .yr-thumb { position:absolute; top:0; left:0; width:100%; height:100%; appearance:none; -webkit-appearance:none; background:transparent; pointer-events:none; }
-        .yr-thumb::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#c9a84c; border:2px solid #080810; cursor:pointer; pointer-events:all; box-shadow:0 0 0 3px rgba(201,168,76,.2); transition: box-shadow .15s; }
-        .yr-thumb::-webkit-slider-thumb:hover { box-shadow:0 0 0 5px rgba(201,168,76,.3); }
-        .yr-thumb::-moz-range-thumb { width:14px; height:14px; border-radius:50%; background:#c9a84c; border:2px solid #080810; cursor:pointer; pointer-events:all; }
-        .yr-thumb::-webkit-slider-runnable-track { background:transparent; }
-        .yr-thumb::-moz-range-track { background:transparent; }
-      `}</style>
-      <div style={{ position:"relative", height:28, marginTop:10, marginBottom:4 }}>
-        {/* Base track */}
-        <div style={{
-          position:"absolute", top:"50%", left:0, right:0,
-          height:3, borderRadius:2, background:"#1e2035",
-          transform:"translateY(-50%)", pointerEvents:"none",
-        }} />
+	return (
+		<div>
+		<FilterLabel>Year Range: {value[0]} – {value[1]}</FilterLabel>
+		<style>{`
+			.yr-thumb { position:absolute; top:0; left:0; width:100%; height:100%; appearance:none; -webkit-appearance:none; background:transparent; pointer-events:none; }
+			.yr-thumb::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#c9a84c; border:2px solid #080810; cursor:pointer; pointer-events:all; box-shadow:0 0 0 3px rgba(201,168,76,.2); transition: box-shadow .15s; }
+			.yr-thumb::-webkit-slider-thumb:hover { box-shadow:0 0 0 5px rgba(201,168,76,.3); }
+			.yr-thumb::-moz-range-thumb { width:14px; height:14px; border-radius:50%; background:#c9a84c; border:2px solid #080810; cursor:pointer; pointer-events:all; }
+			.yr-thumb::-webkit-slider-runnable-track { background:transparent; }
+			.yr-thumb::-moz-range-track { background:transparent; }
+		`}</style>
+		<div style={{ position:"relative", height:28, marginTop:10, marginBottom:4 }}>
+			{/* Base track */}
+			<div style={{
+			position:"absolute", top:"50%", left:0, right:0,
+			height:3, borderRadius:2, background:"#1e2035",
+			transform:"translateY(-50%)", pointerEvents:"none",
+			}} />
 
-        {/* Active fill */}
-        <div style={{
-          position:"absolute", top:"50%",
-          left:`${pctStart}%`,
-          width:`${pctEnd - pctStart}%`,
-          height:3, borderRadius:2,
-          background:"linear-gradient(90deg, #c9a84c, #e8c97a)",
-          transform:"translateY(-50%)", pointerEvents:"none",
-        }} />
-        <input
-          type="range" min={MIN} max={MAX} step={1} value={value[0]}
-          onChange={handleStart}
-          className="yr-thumb"
-          style={{ zIndex: value[0] >= MAX - 5 ? 5 : 3 }}
-        />
-        <input
-          type="range" min={MIN} max={MAX} step={1} value={value[1]}
-          onChange={handleEnd}
-          className="yr-thumb"
-          style={{ zIndex: 4 }}
-        />
-      </div>
-      <div style={{ display:"flex", justifyContent:"space-between", marginTop:2 }}>
-        <span style={styles.yearEndLabel}>{MIN}</span>
-        <span style={styles.yearEndLabel}>{MAX}</span>
-      </div>
-    </div>
-  );
+			{/* Active fill */}
+			<div style={{
+			position:"absolute", top:"50%",
+			left:`${pctStart}%`,
+			width:`${pctEnd - pctStart}%`,
+			height:3, borderRadius:2,
+			background:"linear-gradient(90deg, #c9a84c, #e8c97a)",
+			transform:"translateY(-50%)", pointerEvents:"none",
+			}} />
+			<input
+			type="range" min={MIN} max={MAX} step={1} value={value[0]}
+			onChange={handleStart}
+			className="yr-thumb"
+			style={{ zIndex: value[0] >= MAX - 5 ? 5 : 3 }}
+			/>
+			<input
+			type="range" min={MIN} max={MAX} step={1} value={value[1]}
+			onChange={handleEnd}
+			className="yr-thumb"
+			style={{ zIndex: 4 }}
+			/>
+		</div>
+		<div style={{ display:"flex", justifyContent:"space-between", marginTop:2 }}>
+			<span style={styles.yearEndLabel}>{MIN}</span>
+			<span style={styles.yearEndLabel}>{MAX}</span>
+		</div>
+		</div>
+	);
+
 }
 
 
 
 function ActionBtn({ children, onClick, variant = "primary" }) {
+
   return (
+
+
     <button onClick={onClick} style={{
       ...styles.actionBtn,
       background: variant === "primary" ? "linear-gradient(135deg,#c9a84c,#e8c97a)" : "transparent",
@@ -365,40 +399,49 @@ function ActionBtn({ children, onClick, variant = "primary" }) {
     }}>
       {children}
     </button>
+
   );
+
 }
 
+
+
 function InsightCard({ label, value, delta, tooltip }) {
-  const [hovered, setHovered] = useState(false);
-  const positive = delta >= 0;
-  return (
-    <div style={styles.insightCard}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-        <div style={styles.insightLabel}>{label}</div>
-        {tooltip && (
-          <div
-            style={styles.tooltipAnchor}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-          >
-            <div style={styles.questionMark}>?</div>
-            {hovered && (
-              <div style={styles.tooltipPopup}>
-                {tooltip}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      <div style={styles.insightValue}>{value}</div>
-      {delta !== undefined && (
-        <div style={{ ...styles.insightDelta, color: positive ? "#50e3a4" : "#ff6b6b" }}>
-          {positive ? "▲" : "▼"} {Math.abs(delta)}% over period
-        </div>
-      )}
-    </div>
-  );
+
+	const [hovered, setHovered] = useState(false);
+	const positive = delta >= 0;
+		
+	return (
+		<div style={styles.insightCard}>
+		<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+			<div style={styles.insightLabel}>{label}</div>
+			{tooltip && (
+			<div
+				style={styles.tooltipAnchor}
+				onMouseEnter={() => setHovered(true)}
+				onMouseLeave={() => setHovered(false)}
+			>
+				<div style={styles.questionMark}>?</div>
+				{hovered && (
+				<div style={styles.tooltipPopup}>
+					{tooltip}
+				</div>
+				)}
+			</div>
+			)}
+		</div>
+		<div style={styles.insightValue}>{value}</div>
+		{delta !== undefined && (
+			<div style={{ ...styles.insightDelta, color: positive ? "#50e3a4" : "#ff6b6b" }}>
+			{positive ? "▲" : "▼"} {Math.abs(delta)}% over period
+			</div>
+		)}
+		</div>
+	);
+
 }
+
+
 
 function linearRegression(data) {
 
@@ -454,7 +497,7 @@ function linearRegression(data) {
 	// return a function that predicts workers for any given year
 	return (year) => slope * year + intercept;
   
-  }
+}
 
 
 // ── Main ─────────────────────────────────────────────────────────────────────-----------------
@@ -473,10 +516,10 @@ export default function FindOccupation() {
 	const [chartType, setChartType] = useState("line");
 
 	const [chartColor, setChartColor]       = useState("#c9a84c");  // default gold
-const [lineType, setLineType]           = useState("monotone"); // smooth or sharp
-const [showDots, setShowDots]           = useState(true);       // show data points
-const [showGrid, setShowGrid]           = useState(true);       // show grid lines
-const [showCustomize, setShowCustomize] = useState(false);      // show/hide the panel
+	const [lineType, setLineType]           = useState("monotone"); // smooth or sharp
+	const [showDots, setShowDots]           = useState(true);       // show data points
+	const [showGrid, setShowGrid]           = useState(true);       // show grid lines
+	const [showCustomize, setShowCustomize] = useState(false);      // show/hide the panel
 
 	//function for donwlaoding the chart
 	const downloadChart = () => {
@@ -492,10 +535,10 @@ const [showCustomize, setShowCustomize] = useState(false);      // show/hide the
 
 	};
 
-  	const toggleOcc = o =>
-    	setSelected(prev => prev.includes(o) ? prev.filter(x => x !== o) : [...prev, o]);
+  	const toggleOcc = o => setSelected(prev => prev.includes(o) ? prev.filter(x => x !== o) : [...prev, o]);
 
-	  const [errors, setErrors] = useState({});
+	const [errors, setErrors] = useState({});
+
 
   	const apply = () => {
 
@@ -532,10 +575,13 @@ const [showCustomize, setShowCustomize] = useState(false);      // show/hide the
 
   	};
 
+
 	const reset = () => {
+
 		setSelected([]); setApplied(null); setProvince("All");
 		setYearRange([1987, 2025]); setEmpType("All");
 		setActiveTab("trend");
+
 	};
 
 	const allSeries  = applied ? buildAllSeries(applied.province, applied.empType, applied.yearRange[0], applied.yearRange[1]) : {};
@@ -582,7 +628,7 @@ const [showCustomize, setShowCustomize] = useState(false);      // show/hide the
 	const TABS = [
 
 		{ id: "trend", label: "Trend" },
-		{ id: "share", label: "Workforce Share" },
+		//{ id: "share", label: "Workforce Share" },
 
 	];
 
@@ -656,6 +702,7 @@ const [showCustomize, setShowCustomize] = useState(false);      // show/hide the
 
 	}
 
+
 	// generate prediction points from 2026 to 2035
 	// each point is { year, predicted } which the chart will use
 	const predictionData = [];
@@ -674,285 +721,283 @@ const [showCustomize, setShowCustomize] = useState(false);      // show/hide the
 
 	}
 
-  return (
+  	return (
 
-    <div style={styles.page}>
-	    
-		
-		
-      	<SidePanel>
-
-        	<OccupationList selected={selected} onToggle={toggleOcc} max={1} />
-			{errors.occ && (
-				<div style={{ color: "#ff6b6b", fontSize: "0.75rem", marginTop: "4px" }}>
-					{errors.occ}
-				</div>
-			)}
-
-        	<ProvinceSelect value={province} onChange={setProvince} />
-			{errors.province && (
-				<div style={styles.errorText}>
-					{errors.province}
-				</div>
-			)}
-        	<EmploymentType value={empType} onChange={setEmpType} />
-        	<YearRange value={yearRange} onChange={setYearRange} />
-
-        	<div style={styles.sideFooter}>
-
-          		<ActionBtn onClick={reset} variant="secondary">Reset</ActionBtn>
-          		<ActionBtn onClick={apply}>Apply</ActionBtn>
-
-        	</div>
-
-      </SidePanel>
-
-	  
-      <div style={styles.mainPanel}>
-
-
-		{/*First is to show the empty state, before submit is clicked */}
-		{!applied && (
-
-			<div style = {styles.emptyState}> 
-
-				<div style = {styles.emptyTitle}> Select Filters to View Occupation Trends </div>
-
-
-				<div style = {styles.emptySubtitle}> Choose an occupation, set province, apply </div>
+		<div style={styles.page}>
 			
-			</div>
+			<SidePanel>
 
-		)}
+				<OccupationList selected={selected} onToggle={toggleOcc} max={1} />
+
+				{errors.occ && (
+					<div style={{ color: "#ff6b6b", fontSize: "0.75rem", marginTop: "4px" }}>
+						{errors.occ}
+					</div>
+				)}
+
+				<ProvinceSelect value={province} onChange={setProvince} />
+
+				{errors.province && (
+					<div style={styles.errorText}>
+						{errors.province}
+					</div>
+				)}
 
 
-		{/*Then, we show the results, when filters are applied and submit is clicked*/}
-		{applied && (
+				<EmploymentType value={empType} onChange={setEmpType} />
+				<YearRange value={yearRange} onChange={setYearRange} />
 
-			<div style = {styles.resultGraph}> 
 
-				{/*This div is for the subtitles */}
-				<div>
-              		<div style={styles.sectionTag}>
-						
-						Selected Occupation for Analysis
-						
+				<div style={styles.sideFooter}>
+
+					<ActionBtn onClick={reset} variant="secondary">Reset</ActionBtn>
+					<ActionBtn onClick={apply}>Apply</ActionBtn>
+
+				</div>
+
+
+			</SidePanel>
+
+
+
+		
+			<div style={styles.mainPanel}>
+
+
+				{/*First is to show the empty state, before submit is clicked */}
+				{!applied && (
+
+					<div style = {styles.emptyState}> 
+
+						<div style = {styles.emptyTitle}> Select Filters to View Occupation Trends </div>
+
+
+						<div style = {styles.emptySubtitle}> Choose an occupation, set province, apply </div>
+					
 					</div>
 
-              		<h2 style={styles.resultTitle}>{applied.occ}</h2>
-
-              		<div style={styles.resultSubtitle}>
-
-						{/*this shows the time range selected by the user, and province */}
-                		Filters: {applied.province} / {applied.yearRange[0]} – {applied.yearRange[1]} / {applied.empType} 
-
-              		</div>
-
-            	</div>
-
-				{/*This is for the three cards*/}
-				<div style={styles.insightGrid}>
-					
-
-					<InsightCard label="Peak Employment Number" value={peak.toLocaleString() + "k"}
-						
-						tooltip="The highest worker count recorded for this occupation within the selected year range and province." 
-						
-					/>
-
-					<InsightCard label="Final Count" value={last.toLocaleString() + "k"} delta={delta}
-
-						tooltip="Total workers in this occupation at the end of the selected period. The % change shows growth or decline relative to the starting year." 
-					
-					/>
-
-					<InsightCard label="Lowest Year" value={lowYear}
-
-						tooltip="This occupation's share of the total provincial workforce at the end of the period. A falling share means this sector grew slower than the overall workforce — even if absolute numbers rose." 
-						
-					/>
+				)}
 
 
-					<InsightCard label="Peak Year" value={peakYear} 
+				{/*Then, we show the results, when filters are applied and submit is clicked*/}
+				{applied && (
 
-					tooltip="This shows the year that had the most workers" 
+					<div style = {styles.resultGraph}> 
 
-					/>
+						{/*This div is for the subtitles */}
+						<div>
+							<div style={styles.sectionTag}>
+								
+								Selected Occupation for Analysis
+								
+							</div>
 
+							<h2 style={styles.resultTitle}>{applied.occ}</h2>
 
-					<InsightCard label="Average Employment" value={averageWorkers + "k"} 
+							<div style={styles.resultSubtitle}>
 
-					tooltip="Shows the average yearly worker count for the selected years" 
+								{/*this shows the time range selected by the user, and province */}
+								Filters: {applied.province} / {applied.yearRange[0]} – {applied.yearRange[1]} / {applied.empType} 
 
-					/>
+							</div>
 
-            	</div>
+						</div>
 
-				{/*This is for the tabs to switch between the trend chart and the share chart */}
-				<div style = {styles.tabBar}>
-
-              		{TABS.map(t => (
-
-
-                		<button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-
-                  			...styles.tabBtn,
-                  			color:        activeTab === t.id ? "#e8c97a" : "#4a4f6a",
-                  			borderBottom: activeTab === t.id ? "2px solid #c9a84c" : "2px solid transparent",
-
-                		}}>
-
-                  			{t.label}
-							
-                		</button>
-             		))}
-
-            	</div>
-
-				<div style={{ display: "flex", gap: 8, marginBottom: "1rem" }}>
-
-					{["line", "bar", "area"].map(type => (
-						<button
-						key={type}
-						onClick={() => setChartType(type)}
-						style={{
-							padding: "4px 12px",
-							borderRadius: 4,
-							border: chartType === type ? "1px solid #c9a84c" : "1px solid #2e3050",
-							background: chartType === type ? "rgba(201,168,76,0.15)" : "transparent",
-							color: chartType === type ? "#c9a84c" : "#4a4f6a",
-							fontFamily: "'DM Mono',monospace",
-							fontSize: "0.65rem",
-							letterSpacing: ".08em",
-							cursor: "pointer",
-							textTransform: "uppercase",
-						}}
-						>
-						{type}
-						</button>
-					))}
-
-				</div>
-
-
-
-
-				{/*This is for the occupation trends chart over the specfic time*/}
-				{activeTab === "trend" && (
-
-					
-						
-              		<div style={styles.card} ref={chartRef}>
-						
-						{/*(<h2 style={styles.resultTitleGraph}>{applied.occ}</h2>)*/}
-						<div style = {styles.cardLabel}> Workers Overtime ({applied.occ}) </div>
-
-				
-
-
-							{/* Bar chart */}
-							{chartType === "bar" && (
-
-								<ResponsiveContainer width="100%" height={260}>
-
-								<BarChart data={chartData}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
-								<XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick}
-									label={{ value: "Years", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "15px" }} />
-								<YAxis stroke="#4a4f6a" tick={styles.chartTick} width={90}
-									label={{ value: "Workers", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "15px", offset: 10 }}
-									tickFormatter={v => (v * 1000).toLocaleString()} />
-								<Tooltip contentStyle={styles.tooltipBox}
-									formatter={v => [(v * 1000).toLocaleString(), "workers"]} />
-								<Bar dataKey="workers" fill="#c9a84c" radius={[4, 4, 0, 0]} />
-								</BarChart>
-		
-								</ResponsiveContainer>
-
-							)}
-    
-							
-							{/* Line chart */}
-							{chartType === "line" && (
-							<ResponsiveContainer width="100%" height={260}>
-								<LineChart data={chartData}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
-								<XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick}
-									label={{ value: "Years", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "15px" }} />
-								<YAxis stroke="#4a4f6a" tick={styles.chartTick} width={90}
-									label={{ value: "Workers", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "15px", offset: 10 }}
-									tickFormatter={v => (v * 1000).toLocaleString()} />
-								<Tooltip contentStyle={styles.tooltipBox}
-									formatter={v => [(v * 1000).toLocaleString(), "workers"]} />
-								<Line type="monotone" dataKey="workers"
-									stroke="#c9a84c" strokeWidth={2}
-									dot={{ fill: "#c9a84c", r: 4 }} />
-								</LineChart>
-							</ResponsiveContainer>
-							)}
-
-
-							{/* Area chart */}
-							{chartType === "area" && (
-							<ResponsiveContainer width="100%" height={260}>
-								<AreaChart data={chartData}>
-								<defs>
-									<linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-									<stop offset="5%" stopColor="#c9a84c" stopOpacity={0.9} />
-									<stop offset="95%" stopColor="#c9a84c" stopOpacity={0.9} />
-									</linearGradient>
-								</defs>
-								<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
-								<XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick}
-									label={{ value: "Years", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "15px" }} />
-								<YAxis stroke="#4a4f6a" tick={styles.chartTick} width={90}
-									label={{ value: "Workers", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "15px", offset: 10 }}
-									tickFormatter={v => (v * 1000).toLocaleString()} />
-								<Tooltip contentStyle={styles.tooltipBox}
-									formatter={v => [(v * 1000).toLocaleString(), "workers"]} />
-								<Area type="monotone" dataKey="workers"
-									stroke="#c9a84c" strokeWidth={2}
-									fill="url(#areaGrad)" dot={{ fill: "#c9a84c", r: 4 }} />
-								</AreaChart>
-							</ResponsiveContainer>
-							)}
-
+						{/*This is for the three cards*/}
+						<div style={styles.insightGrid}>
 							
 
+							<InsightCard label="Peak Employment Number" value={peak.toLocaleString() + "k"}
+								
+								tooltip="The highest worker count recorded for this occupation within the selected year range and province." 
+								
+							/>
+
+							<InsightCard label="Final Count" value={last.toLocaleString() + "k"} delta={delta}
+
+								tooltip="Total workers in this occupation at the end of the selected period. The % change shows growth or decline relative to the starting year." 
+							
+							/>
+
+							<InsightCard label="Lowest Year" value={lowYear}
+
+								tooltip="This occupation's share of the total provincial workforce at the end of the period. A falling share means this sector grew slower than the overall workforce — even if absolute numbers rose." 
+								
+							/>
+
+
+							<InsightCard label="Peak Year" value={peakYear} 
+
+							tooltip="This shows the year that had the most workers" 
+
+							/>
+
+
+							<InsightCard label="Average Employment" value={averageWorkers + "k"} 
+
+							tooltip="Shows the average yearly worker count for the selected years" 
+
+							/>
+
+						</div>
+
+
+
+						{/*This is for the tabs to switch between the trend chart and the share chart */}
+						<div style = {styles.tabBar}>
+
+
+							{TABS.map(t => (
+
+
+								<button key={t.id} onClick={() => setActiveTab(t.id)} style={{
+
+									...styles.tabBtn,
+									color:        activeTab === t.id ? "#e8c97a" : "#4a4f6a",
+									borderBottom: activeTab === t.id ? "2px solid #c9a84c" : "2px solid transparent",
+
+								}}>
+
+									{t.label}
+									
+								</button>
+							))}
+
+
+						</div>
+
+
+
+						<div style={{ display: "flex", gap: 8, marginBottom: "1rem" }}>
+
+							{["line", "bar", "area"].map(type => (
+								<button
+								key={type}
+								onClick={() => setChartType(type)}
+								style={{
+									padding: "4px 12px",
+									borderRadius: 4,
+									border: chartType === type ? "1px solid #c9a84c" : "1px solid #2e3050",
+									background: chartType === type ? "rgba(201,168,76,0.15)" : "transparent",
+									color: chartType === type ? "#c9a84c" : "#4a4f6a",
+									fontFamily: "'DM Mono',monospace",
+									fontSize: "0.65rem",
+									letterSpacing: ".08em",
+									cursor: "pointer",
+									textTransform: "uppercase",
+								}}
+								>
+								{type}
+								</button>
+							))}
+
+						</div>
+
+
+
+
+						{/*This is for the occupation trends chart over the specfic time*/}
+						{activeTab === "trend" && (
+
+								
+							<div style={styles.card} ref={chartRef}>
+								
+								{/*(<h2 style={styles.resultTitleGraph}>{applied.occ}</h2>)*/}
+								<div style = {styles.cardLabel}> Workers Overtime ({applied.occ}) </div>
 
 						
+									{/* Bar chart */}
+									{chartType === "bar" && (
 
-              		</div>
-	
+										<ResponsiveContainer width="100%" height={260}>
 
-            	)} {/*End of activeTab for "trends" chart */}
+										<BarChart data={chartData}>
+										<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
+										<XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick}
+											label={{ value: "Years", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "15px" }} />
+										<YAxis stroke="#4a4f6a" tick={styles.chartTick} width={90}
+											label={{ value: "Workers", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "15px", offset: 10 }}
+											tickFormatter={v => (v * 1000).toLocaleString()} />
+										<Tooltip contentStyle={styles.tooltipBox}
+											formatter={v => [(v * 1000).toLocaleString(), "workers"]} />
+										<Bar dataKey="workers" fill="#c9a84c" radius={[4, 4, 0, 0]} />
+										</BarChart>
+				
+										</ResponsiveContainer>
 
+									)}
+			
+									
+									{/* Line chart */}
+									{chartType === "line" && (
+									<ResponsiveContainer width="100%" height={260}>
+										<LineChart data={chartData}>
+										<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
+										<XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick}
+											label={{ value: "Years", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "15px" }} />
+										<YAxis stroke="#4a4f6a" tick={styles.chartTick} width={90}
+											label={{ value: "Workers", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "15px", offset: 10 }}
+											tickFormatter={v => (v * 1000).toLocaleString()} />
+										<Tooltip contentStyle={styles.tooltipBox}
+											formatter={v => [(v * 1000).toLocaleString(), "workers"]} />
+										<Line type="monotone" dataKey="workers"
+											stroke="#c9a84c" strokeWidth={2}
+											dot={{ fill: "#c9a84c", r: 4 }} />
+										</LineChart>
+									</ResponsiveContainer>
+									)}
+
+
+									{/* Area chart */}
+									{chartType === "area" && (
+									<ResponsiveContainer width="100%" height={260}>
+										<AreaChart data={chartData}>
+										<defs>
+											<linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+											<stop offset="5%" stopColor="#c9a84c" stopOpacity={0.9} />
+											<stop offset="95%" stopColor="#c9a84c" stopOpacity={0.9} />
+											</linearGradient>
+										</defs>
+										<CartesianGrid strokeDasharray="3 3" stroke="#1e2035" />
+										<XAxis dataKey="year" stroke="#4a4f6a" tick={styles.chartTick}
+											label={{ value: "Years", position: "insideBottom", offset: -5, fill: "#4a4f6a", fontSize: "15px" }} />
+										<YAxis stroke="#4a4f6a" tick={styles.chartTick} width={90}
+											label={{ value: "Workers", angle: -90, position: "insideLeft", fill: "#4a4f6a", fontSize: "15px", offset: 10 }}
+											tickFormatter={v => (v * 1000).toLocaleString()} />
+										<Tooltip contentStyle={styles.tooltipBox}
+											formatter={v => [(v * 1000).toLocaleString(), "workers"]} />
+										<Area type="monotone" dataKey="workers"
+											stroke="#c9a84c" strokeWidth={2}
+											fill="url(#areaGrad)" dot={{ fill: "#c9a84c", r: 4 }} />
+										</AreaChart>
+									</ResponsiveContainer>
+									)}
+
+
+							</div>
+			
+
+						)} {/*End of activeTab for "trends" chart */}
+
+								
+								
+					
 						
-						
-				
+				<button onClick={downloadChart} style={styles.downloadBtn}>
 
+					Download Chart
 
-				
-		<button onClick={downloadChart} style={styles.downloadBtn}>
+				</button>
 
-			Download Chart
+			</div>
 
-		</button>
+			)}
 
+		</div>
 
-				
+		</div>
 
-
-	</div>
-
-	)}
-
-      </div>
-
-    </div>
-
-  );
-
+  	);
 
 } //end of FindOccupation component
 

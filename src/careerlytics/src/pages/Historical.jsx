@@ -1,12 +1,21 @@
 import { useState } from "react";
+
+//This imports componenets from the React-Leaflet library
+//React-Leaflet is whats lets us use Leaflet maps inside React
 import { MapContainer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+
+//Map container is the actual interactive map
+//GeoJSON draws geographic shapes aka the provinces from GeoJSON data, which is a common format for geographic data. It contains the shapes and boundaries of the provinces, which we can style and add interactivity to.
 
 
 //this data.json file contains the parsed data from stats canada's raw data, organized by occupation, province, and employment type, with yearly worker counts for each combination. 
 import rawData from "../../../Data/backend/data.json";
 
+//this is the GeoJSON map data for Canada
+//GeoJSON describes the polygon shapes of provinces
 import canadaGeoJSON from "../../../Data/backend/canada.json";
+
 
 //https://github.com/codeforgermany/click_that_hood/tree/main/public/data
 
@@ -14,50 +23,53 @@ import canadaGeoJSON from "../../../Data/backend/canada.json";
 
 
 export const OCCUPATIONS = [
-  "Legislative and senior management occupations",
-  "Specialized middle management occupations",
-  "Middle management occupations in retail and wholesale trade and customer services",
-  "Middle management occupations in trades, transportation, production and utilities",
-  "Professional occupations in finance",
-  "Professional occupations in business",
-  "Administrative and financial supervisors and specialized administrative occupations",
-  "Administrative occupations and transportation logistics occupations",
-  "Administrative and financial support and supply chain logistics occupations",
-  "Professional occupations in natural sciences",
-  "Professional occupations in applied sciences (except engineering)",
-  "Professional occupations in engineering",
-  "Technical occupations related to natural and applied sciences",
-  "Health treating and consultation services professionals",
-  "Therapy and assessment professionals",
-  "Nursing and allied health professionals",
-  "Technical occupations in health",
-  "Assisting occupations in support of health services",
-  "Professional occupations in law",
-  "Professional occupations in education services",
-  "Professional occupations in social and community services",
-  "Professional occupations in government services",
-  "Occupations in front-line public protection services",
-  "Paraprofessional occupations in legal, social, community and education services",
-  "Assisting occupations in education and in legal and public protection",
-  "Care providers and public protection support occupations and student monitors, crossing guards and related occupations",
-  "Professional occupations in art and culture",
-  "Technical occupations in art, culture and sport",
-  "Occupations in art, culture and sport",
-  "Support occupations in art, culture and sport",
-  "Retail sales and service supervisors and specialized occupations in sales and services",
-  "Occupations in sales and services",
-  "Sales and service representatives and other customer and personal services occupations",
-  "Sales and service support occupations",
-  "Technical trades and transportation officers and controllers",
-  "General trades",
-  "Mail and message distribution, other transport equipment operators and related maintenance workers",
-  "Helpers and labourers and other transport drivers, operators and labourers",
-  "Supervisors and occupations in natural resources, agriculture and related production",
-  "Workers and labourers in natural resources, agriculture and related production",
-  "Supervisors, central control and process operators in processing, manufacturing and utilities and aircraft assemblers and inspectors",
-  "Machine operators, assemblers and inspectors in processing, manufacturing and printing",
-  "Labourers in processing, manufacturing and utilities",
-  "Unclassified occupations",
+
+        
+    "Legislative and senior management occupations",
+    "Specialized middle management occupations",
+    "Middle management occupations in retail and wholesale trade and customer services",
+    "Middle management occupations in trades, transportation, production and utilities",
+    "Professional occupations in finance",
+    "Professional occupations in business",
+    "Administrative and financial supervisors and specialized administrative occupations",
+    "Administrative occupations and transportation logistics occupations",
+    "Administrative and financial support and supply chain logistics occupations",
+    "Professional occupations in natural sciences",
+    "Professional occupations in applied sciences (except engineering)",
+    "Professional occupations in engineering",
+    "Technical occupations related to natural and applied sciences",
+    "Health treating and consultation services professionals",
+    "Therapy and assessment professionals",
+    "Nursing and allied health professionals",
+    "Technical occupations in health",
+    "Assisting occupations in support of health services",
+    "Professional occupations in law",
+    "Professional occupations in education services",
+    "Professional occupations in social and community services",
+    "Professional occupations in government services",
+    "Occupations in front-line public protection services",
+    "Paraprofessional occupations in legal, social, community and education services",
+    "Assisting occupations in education and in legal and public protection",
+    "Care providers and public protection support occupations and student monitors, crossing guards and related occupations",
+    "Professional occupations in art and culture",
+    "Technical occupations in art, culture and sport",
+    "Occupations in art, culture and sport",
+    "Support occupations in art, culture and sport",
+    "Retail sales and service supervisors and specialized occupations in sales and services",
+    "Occupations in sales and services",
+    "Sales and service representatives and other customer and personal services occupations",
+    "Sales and service support occupations",
+    "Technical trades and transportation officers and controllers",
+    "General trades",
+    "Mail and message distribution, other transport equipment operators and related maintenance workers",
+    "Helpers and labourers and other transport drivers, operators and labourers",
+    "Supervisors and occupations in natural resources, agriculture and related production",
+    "Workers and labourers in natural resources, agriculture and related production",
+    "Supervisors, central control and process operators in processing, manufacturing and utilities and aircraft assemblers and inspectors",
+    "Machine operators, assemblers and inspectors in processing, manufacturing and printing",
+    "Labourers in processing, manufacturing and utilities",
+    "Unclassified occupations",
+
 ];
 
 /*
@@ -86,139 +98,190 @@ const PROVINCES = [
 ];
 
 // ─── DATA HELPERS ─────────────────────────────────────────────────
+
+//Takes an occupation and year, and returns worker counts for every province
+//getProvinceWorkers("Professional occupations in finance", 2010)
 function getProvinceWorkers(occ, year) {
-  const provinces = [
-    "Newfoundland and Labrador",
-    "Prince Edward Island",
-    "Nova Scotia",
-    "New Brunswick",
-    "Quebec",
-    "Ontario",
-    "Manitoba",
-    "Saskatchewan",
-    "Alberta",
-    "British Columbia",
-  ];
 
-  return provinces.map((province) => {
-    const series = rawData[occ]?.[province]?.["Employment"] ?? [];
-    const match = series.find((d) => d.year === year);
-    return { province, workers: match?.workers ?? 0 };
-  });
+
+    const provinces = [
+        "Newfoundland and Labrador",
+        "Prince Edward Island",
+        "Nova Scotia",
+        "New Brunswick",
+        "Quebec",
+        "Ontario",
+        "Manitoba",
+        "Saskatchewan",
+        "Alberta",
+        "British Columbia",
+    ];
+
+    return provinces.map((province) => {
+        const series = rawData[occ]?.[province]?.["Employment"] ?? [];
+        const match = series.find((d) => d.year === year);
+        return { province, workers: match?.workers ?? 0 };
+    });
+
 }
 
+
+//This function belnds two colours together
 function lerpColor(a, b, t) {
-  const ah = a.replace("#", "");
-  const bh = b.replace("#", "");
-  const ar = parseInt(ah.slice(0, 2), 16);
-  const ag = parseInt(ah.slice(2, 4), 16);
-  const ab = parseInt(ah.slice(4, 6), 16);
-  const br = parseInt(bh.slice(0, 2), 16);
-  const bg = parseInt(bh.slice(2, 4), 16);
-  const bb = parseInt(bh.slice(4, 6), 16);
-  const r  = Math.round(ar + (br - ar) * t).toString(16).padStart(2, "0");
-  const g  = Math.round(ag + (bg - ag) * t).toString(16).padStart(2, "0");
-  const b2 = Math.round(ab + (bb - ab) * t).toString(16).padStart(2, "0");
-  return `#${r}${g}${b2}`;
+
+    const ah = a.replace("#", "");
+    const bh = b.replace("#", "");
+    const ar = parseInt(ah.slice(0, 2), 16);
+    const ag = parseInt(ah.slice(2, 4), 16);
+    const ab = parseInt(ah.slice(4, 6), 16);
+    const br = parseInt(bh.slice(0, 2), 16);
+    const bg = parseInt(bh.slice(2, 4), 16);
+    const bb = parseInt(bh.slice(4, 6), 16);
+    const r  = Math.round(ar + (br - ar) * t).toString(16).padStart(2, "0");
+    const g  = Math.round(ag + (bg - ag) * t).toString(16).padStart(2, "0");
+    const b2 = Math.round(ab + (bb - ab) * t).toString(16).padStart(2, "0");
+    return `#${r}${g}${b2}`;
+
 }
 
+//this maps worker numbers with colour intensity
 function workerColor(value, min, max) {
-  if (max === min) return "#c9a84c";
-  const t = (value - min) / (max - min);
-  if (t < 0.5) return lerpColor("#1a1030", "#c9a84c", t * 2);
-  return lerpColor("#c9a84c", "#ffe899", (t - 0.5) * 2);
+
+    if (max === min) return "#c9a84c";
+    const t = (value - min) / (max - min);
+    if (t < 0.5) return lerpColor("#1a1030", "#c9a84c", t * 2);
+    return lerpColor("#c9a84c", "#ffe899", (t - 0.5) * 2);
+
 }
 
 
 // ─── HELPERS ──────────────────────────────────────────────────────
 
+//create a small label component for the filters
 function FilterLabel({ children }) {
-  return <div style={styles.filterLabel}>{children}</div>;
+    
+    return <div style={styles.filterLabel}>{children}</div>;
+
 }
 
 // ─── MAP COMPONENT ────────────────────────────────────────────────
 
+//this is the function that renders the interactive map of Canada
+//it gets passed the selecte occupation and year, and uses that to get the worker counts for each province, which it then uses to style the map and tooltips
 function ProvinceMap({ occ, year }) {
-  const data = getProvinceWorkers(occ, year);
-  const max  = Math.max(...data.map((d) => d.workers));
-  const min  = Math.min(...data.map((d) => d.workers));
 
-  const style = (feature) => {
-    const name  = feature.properties.name || feature.properties.NAME || "";
-    const match = data.find((d) => d.province === name);
-    return {
-      fillColor:   match ? workerColor(match.workers, min, max) : "#1e2035",
-      fillOpacity: 0.85,
-      color:       "#080810",
-      weight:      1,
+    //get the worker counts for each province for the selected occupation and year
+    const data = getProvinceWorkers(occ, year);
+
+    //find max and min workers for the provinces
+    const max  = Math.max(...data.map((d) => d.workers));
+    const min  = Math.min(...data.map((d) => d.workers));
+
+
+    //Leaflet calls this function for each province polygon
+    const style = (feature) => {
+
+        //get province name from the GeoJSON properties, and find the matching worker data for that province
+        const name  = feature.properties.name || feature.properties.NAME || "";
+
+        //find the worker data for that province
+        const match = data.find((d) => d.province === name);
+
+
+        return {
+
+            fillColor:   match ? workerColor(match.workers, min, max) : "#1e2035",
+            fillOpacity: 0.85,
+            color:       "#080810",
+            weight:      1,
+
+        };
+
     };
-  };
 
-  const onEachFeature = (feature, layer) => {
-    const name  = feature.properties.name || feature.properties.NAME || "";
-    const match = data.find((d) => d.province === name);
-    if (!match) return;
+    //runs for every province shape
+    const onEachFeature = (feature, layer) => {
 
-    layer.on({
-      mouseover(e) {
-        e.target.setStyle({ fillOpacity: 0.6 });
-        layer
-          .bindTooltip(
-            `<span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:#e8c97a">
-              <strong>${match.province}</strong><br/>
-              ${match.workers.toLocaleString()}k workers
-            </span>`,
-            { className: "map-tooltip", sticky: true }
-          )
-          .openTooltip();
-      },
-      mouseout(e) {
-        e.target.setStyle({ fillOpacity: 0.85 });
-        layer.closeTooltip();
-      },
-    });
-  };
 
-  return (
-    <>
-      {/* Override Leaflet tooltip styles to match dark theme */}
-      <style>{`
-        .map-tooltip {
-          background: #0d0e1a !important;
-          border: 1px solid #c9a84c !important;
-          border-radius: 8px !important;
-          padding: 8px 12px !important;
-          box-shadow: none !important;
-        }
-        .map-tooltip::before { display: none !important; }
-        .leaflet-container { background: #F5E7C6 !important; }
-      `}</style>
 
-      <MapContainer
-        center={[60, -96]}
-        zoom={3}
-        zoomSnap={0.5}
-        minZoom={2}
-        style={{ height: 420, borderRadius: 8, background: "#080810" }}
-        attributionControl={false}
-      >
-        <GeoJSON
-          key={occ + year}
-          data={canadaGeoJSON}
-          style={style}
-          onEachFeature={onEachFeature}
-        />
-      </MapContainer>
+        const name  = feature.properties.name || feature.properties.NAME || "";
+        const match = data.find((d) => d.province === name);
 
-      {/* Legend */}
-      <div style={styles.legend}>
-        <span style={styles.legendLabel}>Low</span>
-        <div style={styles.legendBar} />
-        <span style={styles.legendLabel}>High</span>
-      </div>
-    </>
-  );
+        if (!match) return;
+
+        //mouse events, for when hovering over a province to show tooltip with worker data
+        layer.on({
+
+            mouseover(e) {
+                e.target.setStyle({ fillOpacity: 0.6 });
+                layer
+                .bindTooltip(
+                    `<span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:#e8c97a">
+                    <strong>${match.province}</strong><br/>
+                    ${match.workers.toLocaleString()}k workers
+                    </span>`,
+                    { className: "map-tooltip", sticky: true }
+                )
+                .openTooltip();
+            },
+
+            mouseout(e) {
+                e.target.setStyle({ fillOpacity: 0.85 });
+                layer.closeTooltip();
+            },
+
+        });
+
+    };
+
+
+    return (
+
+        <>
+        {/* Override Leaflet tooltip styles to match dark theme */}
+        <style>{`
+            .map-tooltip {
+            background: #0d0e1a !important;
+            border: 1px solid #c9a84c !important;
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            box-shadow: none !important;
+            }
+            .map-tooltip::before { display: none !important; }
+            .leaflet-container { background: #F5E7C6 !important; }
+        `}</style>
+
+        {/*This creates the Leaflet map*/}
+        <MapContainer
+            ///centers map on Canada
+            center={[60, -96]}
+            zoom={4}
+            zoomSnap={0.5}
+            minZoom={2}
+            style={{ height: 520, borderRadius: 8, background: "#080810" }}
+            attributionControl={false}
+        >
+            {/*This draws the province shapes on the map using the GeoJSON data, and applies the styles and interactivity defined above*/}
+            <GeoJSON
+                key={occ + year}
+                data={canadaGeoJSON}
+                style={style}
+                onEachFeature={onEachFeature}
+            />
+
+        </MapContainer>
+
+        {/* Legend */}
+        <div style={styles.legend}>
+            <span style={styles.legendLabel}>Low</span>
+            <div style={styles.legendBar} />
+            <span style={styles.legendLabel}>High</span>
+        </div>
+        </>
+    );
+
 }
+
 
 const prov = "Ontario";
 const occ = OCCUPATIONS[0];
@@ -226,136 +289,144 @@ console.log("Employment:", rawData[occ]?.[prov]?.["Employment"]);
 console.log("Full-time:", rawData[occ]?.[prov]?.["Full-time employment"]);
 console.log("Part-time:", rawData[occ]?.[prov]?.["Part-time employment"]);
 
+
 // ─── MAIN PAGE ───────────────────────────────────────────────────
 
+//main page compnent
 export default function Historical() {
-  const [mapOcc,     setMapOcc]     = useState(OCCUPATIONS[0]);
-  const [mapYear,    setMapYear]    = useState(2010);
-  const [activeTab,  setActiveTab]  = useState("chart");
 
-  return (
-    <div style={styles.page}>
-      <div style={styles.content}>
+    //state varibales to keep track of the selected occupation, year, and active tab (chart or map)
+    const [mapOcc,     setMapOcc]     = useState(OCCUPATIONS[0]);
+    const [mapYear,    setMapYear]    = useState(2010);
+    const [activeTab,  setActiveTab]  = useState("chart");
 
-        {/* Heading */}
-        <div style={styles.heading}>
-          <div style={styles.sectionTag}>Provincial Employment Overview </div>
-          <h2 style={styles.title}>Workers by Province</h2>
-        </div>
+    return (
 
-        {/* Controls */}
-        <div style={styles.mapControls}>
-          <div>
-            <FilterLabel>Occupation</FilterLabel>
-            <select
-              value={mapOcc}
-              onChange={(e) => setMapOcc(e.target.value)}
-              style={styles.select}
-            >
-              {OCCUPATIONS.map((o) => (
-                <option key={o}>{o}</option>
-              ))}
-            </select>
-          </div>
+        <div style={styles.page}>
+        <div style={styles.content}>
 
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <FilterLabel>Year: {mapYear}</FilterLabel>
-            <input
-              type="range"
-              min={1987}
-              max={2025}
-              value={mapYear}
-              onChange={(e) => setMapYear(Number(e.target.value))}
-              style={{ width: "100%", accentColor: "#c9a84c", cursor: "pointer" }}
-            />
-            <div style={styles.sliderLabels}>
-              <span>1987</span>
-              <span>2006</span>
-              <span>2025</span>
+            {/* Heading */}
+            <div style={styles.heading}>
+            <div style={styles.sectionTag}>Provincial Employment Overview </div>
+            <h2 style={styles.title}>Workers by Province</h2>
             </div>
-          </div>
-        </div>
 
-        {/* Card */}
-        <div style={styles.card}>
-
-          {/* Card header + tabs */}
-          <div style={styles.cardTop}>
-            <div style={styles.cardLabel}>
-              {mapOcc.toUpperCase()} — {mapYear}
-            </div>
-            <div style={styles.tabBar}>
-              {["chart", "map"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  style={{
-                    ...styles.tabBtn,
-                    color:        activeTab === tab ? "#e8c97a" : "#4a4f6a",
-                    borderBottom: activeTab === tab ? "2px solid #c9a84c" : "2px solid transparent",
-                  }}
+            {/* Controls */}
+            <div style={styles.mapControls}>
+            <div>
+                <FilterLabel>Occupation</FilterLabel>
+                <select
+                value={mapOcc}
+                onChange={(e) => setMapOcc(e.target.value)}
+                style={styles.select}
                 >
-                  {tab === "chart" ? "Bar Chart" : "Map View"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Bar chart tab */}
-          {activeTab === "chart" && (() => {
-            const data = getProvinceWorkers(mapOcc, mapYear)
-              .sort((a, b) => b.workers - a.workers)
-              .map((d) => ({
-                ...d,
-                province: d.province
-                  .replace("Newfoundland and Labrador", "NL")
-                  .replace("British Columbia", "BC")
-                  .replace("Prince Edward Island", "PEI")
-                  .replace("New Brunswick", "NB")
-                  .replace("Nova Scotia", "NS")
-                  .replace("Saskatchewan", "SK"),
-              }));
-
-            const max = data[0]?.workers || 1;
-
-            return (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {data.map((d, i) => (
-                  <div key={d.province} style={styles.barRow}>
-                    <div style={styles.barRank}>#{i + 1}</div>
-                    <div style={styles.barLabel}>{d.province}</div>
-                    <div style={styles.barTrack}>
-                      <div
-                        style={{
-                          ...styles.barFill,
-                          width: `${(d.workers / max) * 100}%`,
-                          background: workerColor(
-                            d.workers,
-                            data[data.length - 1].workers,
-                            max
-                          ),
-                        }}
-                      />
-                    </div>
-                    <div style={styles.barValue}>
-                      {d.workers.toLocaleString()}k
-                    </div>
-                  </div>
+                {OCCUPATIONS.map((o) => (
+                    <option key={o}>{o}</option>
                 ))}
-              </div>
-            );
-          })()}
+                </select>
+            </div>
 
-          {/* Map tab */}
-          {activeTab === "map" && (
-            <ProvinceMap occ={mapOcc} year={mapYear} />
-          )}
+            <div style={{ flex: 1, minWidth: 200 }}>
+                <FilterLabel>Year: {mapYear}</FilterLabel>
+                <input
+                type="range"
+                min={1987}
+                max={2025}
+                value={mapYear}
+                onChange={(e) => setMapYear(Number(e.target.value))}
+                style={{ width: "100%", accentColor: "#c9a84c", cursor: "pointer" }}
+                />
+                <div style={styles.sliderLabels}>
+                <span>1987</span>
+                <span>2006</span>
+                <span>2025</span>
+                </div>
+            </div>
+            </div>
 
+            {/* Card */}
+            <div style={styles.card}>
+
+            {/* Card header + tabs */}
+            <div style={styles.cardTop}>
+                <div style={styles.cardLabel}>
+                {mapOcc.toUpperCase()} — {mapYear}
+                </div>
+                <div style={styles.tabBar}>
+                {["chart", "map"].map((tab) => (
+                    <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    style={{
+                        ...styles.tabBtn,
+                        color:        activeTab === tab ? "#e8c97a" : "#4a4f6a",
+                        borderBottom: activeTab === tab ? "2px solid #c9a84c" : "2px solid transparent",
+                    }}
+                    >
+                    {tab === "chart" ? "Bar Graph" : "Map View"}
+                    </button>
+                ))}
+                </div>
+            </div>
+
+            {/* Bar chart tab */}
+            {activeTab === "chart" && (() => {
+                const data = getProvinceWorkers(mapOcc, mapYear)
+                .sort((a, b) => b.workers - a.workers)
+                .map((d) => ({
+                    ...d,
+                    province: d.province
+                    .replace("Newfoundland and Labrador", "NL")
+                    .replace("British Columbia", "BC")
+                    .replace("Prince Edward Island", "PEI")
+                    .replace("New Brunswick", "NB")
+                    .replace("Nova Scotia", "NS")
+                    .replace("Saskatchewan", "SK"),
+                }));
+
+                const max = data[0]?.workers || 1;
+
+                return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {data.map((d, i) => (
+                    <div key={d.province} style={styles.barRow}>
+                        <div style={styles.barRank}>#{i + 1}</div>
+                        <div style={styles.barLabel}>{d.province}</div>
+                        <div style={styles.barTrack}>
+                        <div
+                            style={{
+                            ...styles.barFill,
+                            width: `${(d.workers / max) * 100}%`,
+                            background: workerColor(
+                                d.workers,
+                                data[data.length - 1].workers,
+                                max
+                            ),
+                            }}
+                        />
+                        </div>
+                        <div style={styles.barValue}>
+                        {d.workers.toLocaleString()}k
+                        </div>
+                    </div>
+                    ))}
+                </div>
+                );
+            })()}
+
+            {/* Map tab */}
+            {activeTab === "map" && (
+                <ProvinceMap occ={mapOcc} year={mapYear} />
+            )}
+
+            </div>
         </div>
-      </div>
-    </div>
-  );
+        </div>
+    );
+
 }
+
+
 
 // ─── STYLES ──────────────────────────────────────────────────────
 
