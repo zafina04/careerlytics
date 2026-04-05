@@ -2,6 +2,8 @@
 
 Welcome to Careerlytics!
 
+https://careerlytics-canada.vercel.app/
+
 --HOW TO RUN
 
 1. cd project-setup-g12-ios-update
